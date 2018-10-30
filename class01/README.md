@@ -99,7 +99,7 @@ We're going to make the chart we drew by hand using D3. We're going to cover a l
 
   <body></body>
 
- <script src="https://d3js.org/d3.v4.min.js"></script>
+ <script src="https://d3js.org/d3.v5.min.js"></script>
  
   <script>
     //JS to go here

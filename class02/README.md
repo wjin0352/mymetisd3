@@ -1,5 +1,5 @@
-[Resources](https://github.com/thisismetis/nyc18_dataviz10/blob/master/resources.md)
-[Projects](https://github.com/thisismetis/nyc18_dataviz10/blob/master/projects.md)
+[Resources](https://github.com/thisismetis/nyc18_dataviz11/blob/master/resources.md)
+[Projects](https://github.com/thisismetis/nyc18_dataviz11/blob/master/projects.md)
 
 
 ## Class 2: Charting basics, using D3 with the DOM and making a scatterplot - Part II!

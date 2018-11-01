@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<style>
+  /*CSS goes here*/
+  body {
+    font-family: arial, sans;
+    width: 720px;
+    margin: 20px auto;
+  }
+
+  svg {
+    border:1px solid #000;
+  }
+
+  .axis line {
+    stroke: #ccc;
+    stroke-dasharray: 2px 2px;
+  }
+
+  .anscombe-circle-group text {
+    fill: #aaa;
+    font-size: 11px;
+  }
+
+  .anscombe-circle-group circle {
+    fill: red;
+    stroke: #fff;
+    stroke-width:1px;
+
+  }
+
+</style>
+
+<body>
+
+<script>
+  // JS goes here 
+
+  var margin = {top: 20, right: 40, bottom: 20, left: 20};
+
+  var width = 720 - margin.left - margin.right,
+      height = 400 - margin.top - margin.bottom;
+
+  var x = d3.scaleLinear()
+      .range([0, width])
+      .domain([4, 15]);
+
+  var y = d3.scaleLinear()
+      .range([height, 0])
+      .domain([2, 11]);
+
+  var xAxis = d3.axisBottom(x)
+      .tickSize(-height)
+      .tickPadding(8);
+
+  var yAxis = d3.axisRight(y)
+      .tickSize(-width)
+      .tickPadding(8);
+
+  var svg = d3.select("body").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", `translate(0,${height})`)
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .attr("transform", `translate(${width},0)`)
+      .call(yAxis);
+
+  d3.tsv("./quartet.tsv")
+    .then(function(data) {
+
+    var circleGroup = svg.selectAll(".anscombe-circle-group")
+        .data(data.filter(d => d.group == 'II'))
+      .enter()
+        .append("g")
+        .attr("class", "anscombe-circle-group")
+        .attr("transform", d =>`translate(${x(d.x)},${y(d.y)})`);
+
+    circleGroup.append("circle")
+        .attr("r", 5);
+
+    circleGroup.append("text")
+        .text(d => `(${d.x},${d.y})`)
+        .attr("dx", 6);
+
+  })
+
+</script>
+</body>
+</html>

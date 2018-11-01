@@ -22,64 +22,67 @@ Here's what we'll do today:
   <!DOCTYPE html>
   <meta charset="utf-8">
 
-  <style type="text/css">
-    svg {
-      border: 1px solid #ff00ff;
-    }
-  </style>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<style>
+  /*css to go here*/
+  svg {
+    border:1px solid #000;
+  }
+</style>
 
-  <body>
+<script>
+//JS to go here
 
-  </body>
+  const data = [
+    {'group': 'IV', 'x': 8, 'y':  6.58},
+    {'group': 'IV', 'x': 8, 'y':  5.76},
+    {'group': 'IV', 'x': 8, 'y':  7.71},
+    {'group': 'IV', 'x': 8, 'y':  8.84},
+    {'group': 'IV', 'x': 8, 'y':  8.47},
+    {'group': 'IV', 'x': 8, 'y':  7.04},
+    {'group': 'IV', 'x': 8, 'y':  5.25},
+    {'group': 'IV', 'x': 19, 'y': 12.5},
+    {'group': 'IV', 'x': 8, 'y':  5.56},
+    {'group': 'IV', 'x': 8, 'y':  7.91},
+    {'group': 'IV', 'x': 8, 'y':  6.89}
+  ];
 
-  <script src="https://d3js.org/d3.v4.min.js"></script>
+  const width = 720,
+        height = 400,
+        margin = {top: 10, bottom: 30, left: 40, right: 10}
 
-  <script>
-    //JS to go here
+  const svg = d3.select("body")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",`translate(${margin.left}, ${margin.top})`)
 
-    var xScale = d3.scaleLinear()
-        .domain([0, 20])
-        .range([0, 300]);
+  const xScale = d3.scaleLinear()
+      .domain([0, 20]) // INPUT - data
+      .range([0, width]); // OUTPUT - pixels 
 
-    var yScale = d3.scaleLinear()
-        .domain([0, 15])
-        .range([150, 0]);
+  const yScale = d3.scaleLinear()
+      .domain([0, 15]) // INPUT - data
+      .range([height, 0]); // OUTPUT - pixels 
 
-    var data = [
-      {"x":8, "y":  6.58, "group": "IV"},
-      {"x":8, "y":  5.76, "group": "IV"},
-      {"x":8, "y":  7.71, "group": "IV"},
-      {"x":8, "y":  8.84, "group": "IV"},
-      {"x":8, "y":  8.47, "group": "IV"},
-      {"x":8, "y":  7.04, "group": "IV"},
-      {"x":8, "y":  5.25, "group": "IV"},
-      {"x":19, "y": 12.5, "group": "IV"},
-      {"x":8, "y":  5.56, "group": "IV"},
-      {"x":8, "y":  7.91, "group": "IV"},
-      {"x":8, "y":  6.89, "group": "IV"}
-    ];
+  const xAxis = d3.axisBottom(xScale);
 
-    // d3.select("svg").append("circle")
+  const yAxis = d3.axisLeft(yScale);
 
-    var body = d3.select("body");
+  svg.append("g")
+    .call(yAxis);
 
-    body.append("h1")
-      .text("Hello 2");
+  svg.append("g")
+    .attr("transform",`translate(0, ${height})`)
+    .call(xAxis);
 
-    var svg = body.append("svg");
-    
-    var circle = svg.selectAll("circle")
+  svg.selectAll("circle")
       .data(data)
-      .enter()
-      .append("circle")
-      .attr("r", 4)
-      .attr("cx", function(d,i) {
-        return xScale(d.x);
-      })
-      .attr("cy", function(d,i) {
-        return yScale(d.y);
-      });
-
+    .enter().append("circle")
+      .attr("r", 5)
+      .attr("cx", d => xScale(d.x))
+      .attr("cy", d => yScale(d.y))
   </script>
   ```
 

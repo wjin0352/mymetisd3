@@ -8,19 +8,141 @@
   svg {
     border:1px solid #000;
   }
+
+  .axis line {
+    stroke: #ececec;
+  }
+
+  .x .domain {
+    stroke: #000;
+  }
+
+  .y .domain {
+    stroke: none;
+  }
 </style>
 
 <script>
 //JS to go here
 
-  var data = [];
+// THINGS THAT ARE NOT GREAT
+// Hardcoding data - DONEZO
+// radius is hard coded 
+// hard coding of the axis - DONEZO
+// 
+
+// Nice to Add 
+// * comments that explain the code 
+// * Interation / on hover, annotate the points?
+// * Linear Regression, best fit line? 
+// * Title 
+// * Style the axes 
+// * adjust the ticks
+  // * the values
+  // * The format?
+  // * Tick lines 
+
+// Add color!
+
 
   var width = 720,
-      height = 400;
+      height = 400,
+      margin = {top: 30, bottom: 30, left: 30, right: 30}
 
   d3.select("body")
     .append("h1")
     .text("lets make a scatterplot");
+
+const svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`)
+
+ const xScale = d3.scaleLinear()
+    .range([0, width])
+
+const yScale = d3.scaleLinear()
+    .range([height, 0])
+
+const rScale = d3.scaleLinear()
+    .domain([0, 1])
+    .range([1, 10]);
+
+const colorScale = d3.scaleLinear()
+    .domain([0, 1])
+    .range(["red", "blue"]);
+
+const xAxis = d3.axisBottom(xScale)
+    .tickSize(-height)
+    .tickFormat(d3.format(".2f"))
+
+const yAxis = d3.axisLeft(yScale)
+    .tickSize(-width)
+    
+calculateIQR = (data, field) => {
+  
+  const min = d3.min(data, d =>  +d[field]);
+  const max = d3.max(data, d =>  +d[field]);
+  const median = d3.median(data, d =>  +d[field]);
+  const firstQuartile = d3.quantile(data.map(d => +d[field]).sort(d3.ascending), .25);
+  const thirdQuartile = d3.quantile(data.map(d =>  +d[field]).sort(d3.ascending), .75);
+  
+  return {min: min, max: max, median: median, firstQuartile: firstQuartile, thirdQuartile: thirdQuartile}
+                                  
+}
+
+
+
+d3.tsv("quartet.tsv").then(data => {
+
+  data.forEach(d => {
+    d.x = +d.x;
+    d.y = +d.y;
+    d.r = Math.random();
+  });
+
+  const tickValues = calculateIQR(data, 'x')
+
+  xScale.domain([0, d3.max(data, d => d.x)]).nice()
+  yScale.domain([0, d3.max(data, d => d.y)]).nice()
+
+xAxis.tickValues([tickValues.min, tickValues.firstQuartile, tickValues.thirdQuartile, tickValues.max])
+
+  svg.append("g")
+    .attr('class', "x axis")
+    .call(xAxis)
+    .attr("transform", `translate(0,${height})`)
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+      .selectAll(".tick")
+      .filter((d, i) => i == 0)
+      .remove();
+
+  svg.selectAll("circle")
+    .data(data)
+  .enter().append("circle")
+    .attr("r", d => rScale(d.r))
+    .attr("cx", d => xScale(d.x))
+    .attr("cy", d => yScale(d.y))
+    .style("fill", d => colorScale(d.r))
+})
+
+
+
+ // create the circles 
+ // enter().append()
+
+
+
+
+
+
+
+
+
 
 </script>
 </body>

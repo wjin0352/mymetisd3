@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<style type="text/css">
+</style>
+
+<body>
+</body>
+
+<script>
+
+var scales = ["Linear", "Ordinal", "Point", "Band", "Log", "Pow", "Identity"];
+
+var dataset = [100,300,800,900];
+
+var margin = {top: 20, right: 20, bottom: 20, left: 20};
+
+var width = 800 - margin.left - margin.right,
+    height = 100 - margin.top - margin.bottom;
+
+var divs = d3.selectAll(".scaleDiv")
+      .data(scales)
+    .enter().append("div")
+      .attr("class", "div")
+      .each(multiple)
+
+function multiple(scaleType) { 
+
+  var svg = d3.select(this).append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var scale = d3["scale" + scaleType]()
+
+  if(scaleType == "Linear") { 
+    scale.domain(d3.extent(dataset, function(d) { return d; }))
+         .range([0, width]); 
+  }
+  if(scaleType == "Log") { 
+    scale.range([0, width]); 
+  }
+  if(scaleType == "Pow") { 
+    scale.domain(d3.extent(dataset, function(d) { return d; })) 
+         .exponent(.1)
+         .range([0, width]);
+  }
+  if(scaleType == "Srt") { 
+    scale.range([0, width]);
+  }
+  if(scaleType == "Point") { 
+    scale.domain(dataset) 
+         .padding([1])
+         .rangeRound([0, width]); 
+  }
+  if(scaleType == "Band") { 
+    scale.domain(dataset) 
+         .padding([.5])
+         .rangeRound([0, width]); 
+  }
+  if(scaleType == "Ordinal") { 
+    scale.domain(dataset) 
+         .range([0, 40, 30, width]); 
+  }
+
+  svg.append("text")
+     .attr("y", 10)
+     .text(scaleType);
+
+  svg.selectAll("." + scaleType)
+    .data(dataset)
+    .enter().append("circle")
+    .attr("r", 5)
+    .attr("cy", 40)
+    .attr("cx", function(d) { return scale(d); })
+
+  svg.append("g")
+    .attr("class","x axis")
+    .attr("transform","translate(0," + height + ")")
+    .call(d3.axisBottom(scale));
+}
+
+
+</script>

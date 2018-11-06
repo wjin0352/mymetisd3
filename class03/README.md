@@ -4,12 +4,13 @@ Today we'll do an exercise as a group, then become barley farmers.
 
 ## Housekeeping
 
- * Review of last week
+* Review of last week
   * Learned about Anscombe Quartet
   * Built our first scatterplot
   * Learned how to push to Observable 
+  * Send me your Observables! 
 
- * Goals for this next classes:
+* Goals for this next classes:
  	* Explore charting & intent
  	* Come up with multiple ways to visualize a dataset
  	* Learn about hierarchical data & d3.nest()

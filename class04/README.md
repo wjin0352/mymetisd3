@@ -1,8 +1,8 @@
-#Class 4: Continuing our barley charts; Abstracting functions, discussing merits of chart forms; d3.nest()
+# Class 4: Continuing our barley charts; Abstracting functions, discussing merits of chart forms; d3.nest()
 
 Mmmmmmm Barley
 
-##Housekeeping
+## Housekeeping
 
  * Any questions?
  * Projects & Pace

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+
+<style type="text/css">
+
+  .title {
+    font: 24px sans-serif;
+  }
+  .legend {
+    font: 12px sans-serif;
+  }
+  svg {
+    display: inline-block;
+  }
+</style>
+
+<body>
+</body>
+
+<script>
+
+// CHECK LIST
+
+// HIERARCHY 
+// First Level - Site: SVG
+// Second Level - Variety: Group Tag
+// Third Level - Year: rect
+
+var margin = {top: 20, right: 40, bottom: 30, left: 120};
+
+var width = (window.innerWidth/3) - margin.left - margin.right,
+    height = 200 - margin.top - margin.bottom;
+
+var varietyScale = d3.scaleBand()
+    .padding([.1])
+    .rangeRound([height, 0]);
+
+var xScale = d3.scaleLinear()
+    .range([0, width]);
+
+var xAxis = d3.axisBottom(xScale)
+    .tickPadding(8);
+
+var yAxis = d3.axisLeft(varietyScale)
+    .tickPadding(8);
+
+var colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+d3.tsv("barley.tsv").then(ready)
+
+  function ready(data) {
+
+  window.dataset = data;
+  data.forEach(function(row) {
+    row.yield = +row.yield;
+   })
+
+  var sites = d3.set(data.map(function(d) { return d.site })).values();
+  var varieties = d3.set(data.map(function(d) { return d.variety })).values().sort(function(a, b) { return a > b });
+  var years = d3.set(data.map(function(d) { return d.year })).values().sort(function(a, b) { return a < b });
+
+  xScale.domain(d3.extent(data, function(d)  { return d.yield })).nice();
+  varietyScale.domain(varieties);
+
+ var yearScale = d3.scaleBand()
+     .rangeRound([varietyScale.bandwidth(), 0])
+     .padding([.05])
+     .domain(years);
+
+ var nestedBarleyData = d3.nest().key(function(d) { return d.site })
+  .rollup(function(leaves) { return { 
+    medianValue: d3.median(leaves, function(d) { return d.yield }),
+    totalValue: d3.sum(leaves, function(d) { return d.yield }),
+    lastYear: d3.sum(leaves.filter(function(d) { return d.year == "1931" }), function(d) { return d.yield }),
+    thisYear: d3.sum(leaves.filter(function(d) { return d.year == "1932" }), function(d) { return d.yield }),
+    values: leaves
+    }
+  })
+  .entries(dataset)
+  .sort(function(a, b) { return a.value.totalValue > b.value.totalValue })
+
+  var svg = d3.select("body")
+      .selectAll("svg")
+      .data(nestedBarleyData)
+    .enter().append("svg")
+     .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+   svg.append("g")
+        .attr("class","x axis")
+        .attr("transform","translate(0," + height + ")")
+        .call(xAxis);
+ 
+   svg.append("g")
+        .attr("class","y axis")
+        .call(yAxis);
+
+    svg.append("text")
+      .attr("class", "title")
+      .text(function(d) {console.log(d); return d.key })
+
+   svg.selectAll(".varietyYield")
+      .data(function(d) { return d.value.values })
+    .enter().append("rect")
+      .attr("class", "varietyYield")
+      .attr("x", 0)
+      .attr("width" , function(d) { return xScale(d.yield) })
+      .attr("y", function(d) { return varietyScale(d.variety) + yearScale(d.year) })
+      .attr("height", yearScale.bandwidth())
+      .style("fill", function(d) { return colorScale(d.year); })
+     
+    var legend = svg.selectAll(".legend")
+        .data(colorScale.domain())
+      .enter().append("g")
+        .attr("class", "legend")
+        .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+    legend.append("rect")
+        .attr("x", width - 18)
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", colorScale)
+
+    legend.append("text")
+        .attr("x", width - 20)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .style("text-anchor", "end")
+        .text(function(d) { return d; });
+
+
+ }
+
+
+
+
+
+</script>

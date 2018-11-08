@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+
+<style type="text/css">
+
+.title {
+  font: 14px sans-serif;
+}
+
+body {
+  font: 12px sans-serif;
+  display: inline-block;
+}
+
+</style>
+
+<body>
+</body>
+
+<script>
+
+var margin = {top: 20, right: 50, bottom: 70, left: 40};
+
+var width = 320 - margin.left - margin.right,
+    height = 220 - margin.top - margin.bottom;
+
+var xScale = d3.scaleBand()
+    .padding([.1])
+    .rangeRound([0, width])
+
+d3.tsv("barley.tsv").then(ready)
+
+function ready(data) {
+
+  data.forEach(function(d) {
+    d.yield = +d.yield
+  })
+
+  var yScale = d3.scaleLinear()
+      .range([height, 0])
+      .domain([-25, 25]);
+
+  xScale.domain(d3.set(data.map(function(d) { return d.variety })).values());
+ 
+  var nestedBarley = d3.nest()
+      .key(function(d) { return d.site })
+      .key(function(d) { return d.variety })
+      .entries(data);
+      
+  nestedBarley.forEach(function(site) {
+    site.values.forEach(function(variety) {
+      variety["YoY"] = variety.values[1].yield - variety.values[0].yield
+    })
+  });
+
+  var svg = d3.select("body").selectAll("svg")
+      .data(nestedBarley)
+    .enter().append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+  svg.append("g")
+      .attr("class","y axis")
+      .call(d3.axisLeft(yScale));
+
+  svg.append("text")
+      .attr("class","title")
+      .attr("dy", -5)
+      .text(function(d) { return d.key });
+
+  svg.append("g")
+      .attr("class","x axis")
+      .attr("transform","translate(0," + height + ")")
+      .call(d3.axisBottom(xScale))
+      .selectAll("text")
+      .attr("transform","translate(" + xScale.bandwidth()/2 + " ,0) rotate(45)")
+      .style("text-anchor", "start")
+
+  var bars = svg.selectAll(".bars")
+      .data(function(d) { return d.values })
+    .enter().append("rect")
+      .attr("class", "bars")
+      .attr("width", xScale.bandwidth())
+      .attr("x", function(d) { return xScale(d.key); })
+      .attr("height", function(d) {  return d.YoY > 0 ? height - yScale(d.YoY) - yScale(0) : yScale(d.YoY) - yScale(0); })
+      .attr("y", function(d) { return d.YoY > 0 ? yScale(d.YoY): yScale(0); })
+      .style("fill", function(d) { return d.YoY > 0 ? "#006837" : "#a50026" })
+
+
+ }
+
+
+
+</script>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+
+<style type="text/css">
+
+svg {
+    border: 1px solid #000;
+}
+</style>
+
+<body>
+</body>
+
+<script>
+
+  const width = 200,
+        height = 300,
+        margin = {top: 30, bottom: 30, left: 30, right: 60};
+
+  const xScale = d3.scaleOrdinal()
+      .domain(['1931', '1932'])
+      .range([0, width]);
+
+  const xAxis = d3.axisBottom(xScale);
+
+  const yScale = d3.scaleLinear()
+      .range([height, 0]);
+
+  const yAxis = d3.axisLeft(yScale);
+  const yAxisRight = d3.axisRight(yScale);
+
+d3.tsv("barley.tsv").then(dataset => {
+
+// Loop through Sites 
+  const eachSite = d3.set(dataset.map(d => d.site)).values()
+  eachSite.forEach(site => {
+    drawChart(site, dataset)
+  })
+
+});
+
+function drawChart(siteName, data) {
+
+  const svg = d3.select("body").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  svg.append("text")
+    .style("font", "20px sans-serif")
+    .text(siteName)
+
+  const lastYearValues = {},
+        thisYearValues = {};
+
+  const grandRapids = data.filter(d => d.site == siteName);
+
+  grandRapids.forEach(d => {
+    d.yield = +d.yield;
+    if(d.year == '1931') {
+      lastYearValues[d.variety] = d.yield;
+    } else {
+      thisYearValues[d.variety] = d.yield;
+    }
+  })
+
+ const varieties = d3.set(grandRapids.map(d => d.variety)).values()
+
+ yScale.domain(d3.extent(grandRapids, d => d.yield))
+
+ svg.append("g")
+    .call(yAxis);
+
+ svg.append("g")
+    .attr("transform", `translate(${width},0)`)
+    .call(yAxisRight);
+
+ svg.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(xAxis)
+
+ svg.selectAll(".variety-line")
+    .data(varieties)
+  .enter().append("line")
+    .style("stroke", d => thisYearValues[d] > lastYearValues[d] ? "green" : "red")
+    .attr("class", "variety-line")
+    .attr("x1", d => xScale('1931'))
+    .attr("x2", d => xScale('1932'))
+    .attr("y1", d => yScale(lastYearValues[d]))
+    .attr("y2", d => yScale(thisYearValues[d]))
+
+ svg.selectAll(".variety-label")
+    .data(varieties)
+  .enter().append("text")
+    .attr("class", "variety-label")
+    .attr("x", d => xScale('1932'))
+    .attr("y", d => yScale(thisYearValues[d]))
+    .text(d => d)
+
+}
+
+
+</script>
+
+
+

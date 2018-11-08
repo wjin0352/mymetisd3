@@ -8,6 +8,15 @@
   svg {
     border:1px solid #000;
   }
+
+  .axis line {
+    stroke: #ececec;
+    stroke-dasharray: 2px 2px;
+  }
+  y .domain {
+    stroke: none;
+  }
+
 </style>
 
 <script>
@@ -15,12 +24,72 @@
 
   var data = [];
 
-  var width = 720,
-      height = 400;
+  var margin = {top: 20, right: 40, bottom: 20, left: 20};
 
-  d3.select("body")
-    .append("h1")
-    .text("lets make a scatterplot");
+  var width = 720 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+  
+  const xScale = d3.scaleLinear()
+    .range([0, width])
+
+  const yScale = d3.scaleLinear()
+    .range([height, 0])
+  
+  const rScale = d3.scaleLinear()
+    .domain([0, 1])
+    .range([0,10])
+
+  const xAxis = d3.axisBottom(xScale)
+    .tickSize(-height)
+    .tickPadding(8)
+  const yAxis = d3.axisLeft(yScale)
+    .tickSize(-width)
+    .tickPadding(8)
+
+  var svg = d3.select('body').append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+  .append('g')
+    .attr('transform', `translate(${margin.left}, ${margin.top})`)
+
+  d3.tsv('./quartet.tsv')
+    .then((data) => {
+      data.forEach(d => {
+        // coerce types to integer from string
+        d.x = +d.x
+        d.y = +d.y
+        d.r - Math.random()
+      })
+      // set domain dynamically off data array, min max numbers from d3 extent
+      xScale.domain(d3.extent(data, d => d.x))
+      yScale.domain(d3.extent(data, d => d.y))
+
+    console.log('data: ', data)
+    svg.selectAll('circle')
+      // filter data by 
+      // .data(data.filter(d => d.group == 'II'))
+      .data(data)
+
+    .enter()
+      .append('circle')
+      .attr('r', 4)
+      .attr('cx', d => xScale(d.x))
+      .attr('cy', d => yScale(d.y))
+      // .style('fill', d => colorScale(d.r))
+    svg.append('g')
+      .attr('class', 'x axis')
+      .call(xAxis)
+      .attr('transform', `translate(0, ${height})`)
+      .selectAll('tick')
+      // .filter((d,i) => {
+      //   i % !== 0
+      // })
+
+    svg.append('g')
+      .attr('transform', `translate(0, ${margin.left})`)
+      .call(yAxis)
+})
+
 
 </script>
 </body>

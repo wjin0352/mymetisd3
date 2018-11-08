@@ -12,14 +12,63 @@
 <script>
 //JS to go here
 
-  var data = [];
-
+  var data = [
+    {'group': 'IV',  'x': 8, 'y':  6.58},
+    {'group': 'IV',  'x': 8, 'y':  5.76},
+    {'group': 'IV',  'x': 8, 'y':  7.71},
+    {'group': 'IV',  'x': 8, 'y':  8.84},
+    {'group': 'IV',  'x': 8, 'y':  8.47},
+    {'group': 'IV',  'x': 8, 'y':  7.04},
+    {'group': 'IV',  'x': 8, 'y':  5.25},
+    {'group': 'IV',  'x': 19, 'y': 12.5},
+    {'group': 'IV',  'x': 8, 'y':  5.56},
+    {'group': 'IV',  'x': 8, 'y':  7.91},
+    {'group': 'IV',  'x': 8, 'y':  6.89}
+  ];
+console.log(data)
   var width = 720,
-      height = 400;
+      height = 400,
+      margin = { top: 10, bottom: 30, left: 40, right: 10 }
 
-  d3.select("body")
-    .append("h1")
-    .text("lets make a scatterplot");
+  var svg = d3.select("body")
+    .append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+  .append('g')
+    .attr("transform", `translate(${margin.left}, ${margin.top})`)
+
+  
+  // dots
+  // array of data 
+  // line
+  // title
+  // x scale
+  const xScale = d3.scaleLinear()
+    .domain([0,20])     // input
+    .range([0, width])  // output
+  // y scale
+  const yScale = d3.scaleLinear()
+    .domain([0,13])
+    .range([height, 0])
+  // x axis 
+  const xAxis = d3.axisBottom(xScale)
+  // y axis
+  const yAxis = d3.axisLeft(yScale)
+
+  svg.append('g')
+    .call(yAxis)
+
+  svg.append('g')
+    .attr('transform', `translate(0, ${height})`)
+    .call(xAxis)
+
+  svg.selectAll('circle')
+    .data(data)
+    .enter()
+    .append('circle')
+    .attr('r', 5)
+    .attr('cx', d => xScale(d.x))
+    .attr('cy', d => yScale(d.y))
 
 </script>
 </body>

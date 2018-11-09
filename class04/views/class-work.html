@@ -9,6 +9,14 @@
 svg {
     border: 1px solid #000;
 }
+
+.variety-line {
+  stroke: steelblue;
+  stroke-width: 2;
+  stroke-dasharray: 4, 4;
+}
+
+
 </style>
 
 <body>
@@ -27,84 +35,63 @@ svg {
   const xAxis = d3.axisBottom(xScale);
 
   const yScale = d3.scaleLinear()
+      .domain([0, 67])
       .range([height, 0]);
 
   const yAxis = d3.axisLeft(yScale);
   const yAxisRight = d3.axisRight(yScale);
 
-d3.tsv("barley.tsv").then(dataset => {
+  d3.tsv("barley.tsv").then(dataset => {
 
-// Loop through Sites 
-  const eachSite = d3.set(dataset.map(d => d.site)).values()
-  eachSite.forEach(site => {
-    drawChart(site, dataset)
-  })
+  const nestedData = d3.nest()
+      .key(d => d.site)
+      .sortKeys(d3.ascending)
+      .key(d => d.variety)
+      .sortValues((a,b) => { return b.year - a.year })
+      .entries(dataset);
 
-});
+    const svg = d3.select("body").selectAll("svg")
+        .data(nestedData)
+      .enter().append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
-function drawChart(siteName, data) {
+    svg.append("text")
+       .attr("class", "title")
+       .text(d => d.key)
 
-  const svg = d3.select("body").append("svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+    svg.append("g")
+       .attr("class", "x axis")
+       .attr("transform", `translate(0, ${height})`)
+       .call(xAxis)
 
-  svg.append("text")
-    .style("font", "20px sans-serif")
-    .text(siteName)
+    svg.append("g")
+       .attr("class", "y axis")
+       .call(yAxis)
 
-  const lastYearValues = {},
-        thisYearValues = {};
+    svg.selectAll(".variety-line")
+       .data(d => d.values)
+      .enter().append("line")
+        .attr("class", "variety-line")
+        .attr("x1", d => { debugger; return xScale(d.values[0].year) })
+        .attr("y1", d => yScale(+d.values[0].yield))
+        .attr("x2", d => xScale(d.values[1].year))
+        .attr("y2", d => yScale(+d.values[1].yield))
 
-  const grandRapids = data.filter(d => d.site == siteName);
-
-  grandRapids.forEach(d => {
-    d.yield = +d.yield;
-    if(d.year == '1931') {
-      lastYearValues[d.variety] = d.yield;
-    } else {
-      thisYearValues[d.variety] = d.yield;
-    }
-  })
-
- const varieties = d3.set(grandRapids.map(d => d.variety)).values()
-
- yScale.domain(d3.extent(grandRapids, d => d.yield))
-
- svg.append("g")
-    .call(yAxis);
-
- svg.append("g")
-    .attr("transform", `translate(${width},0)`)
-    .call(yAxisRight);
-
- svg.append("g")
-    .attr("transform", `translate(0,${height})`)
-    .call(xAxis)
-
- svg.selectAll(".variety-line")
-    .data(varieties)
-  .enter().append("line")
-    .style("stroke", d => thisYearValues[d] > lastYearValues[d] ? "green" : "red")
-    .attr("class", "variety-line")
-    .attr("x1", d => xScale('1931'))
-    .attr("x2", d => xScale('1932'))
-    .attr("y1", d => yScale(lastYearValues[d]))
-    .attr("y2", d => yScale(thisYearValues[d]))
-
- svg.selectAll(".variety-label")
-    .data(varieties)
-  .enter().append("text")
-    .attr("class", "variety-label")
-    .attr("x", d => xScale('1932'))
-    .attr("y", d => yScale(thisYearValues[d]))
-    .text(d => d)
-
-}
+  });
 
 
 </script>
+
+
+
+
+
+
+
+
 
 
 

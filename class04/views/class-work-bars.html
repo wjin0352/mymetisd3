@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+
+<style type="text/css">
+
+svg {
+    border: 1px solid #000;
+}
+
+.variety-line {
+  stroke: steelblue;
+  stroke-width: 2;
+  stroke-dasharray: 4, 4;
+}
+
+
+</style>
+
+<body>
+</body>
+
+<script>
+
+  const width = 400,
+        height = 300,
+        margin = {top: 30, bottom: 30, left: 30, right: 60};
+
+  const xScale = d3.scaleBand()
+      .padding([.1])
+      .range([0, width]);
+
+  const xAxis = d3.axisBottom(xScale);
+
+  const yScale = d3.scaleLinear()
+      .domain([-25, 25])
+      .range([height, 0]);
+
+  const colorScale = d3.scaleSequential(d3.interpolateRdYlGn)
+      .domain([-25, 25])
+
+  const yAxis = d3.axisLeft(yScale);
+  const yAxisRight = d3.axisRight(yScale);
+
+  d3.tsv("barley.tsv").then(dataset => {
+
+  xScale.domain(d3.set(dataset.map(d => d.variety)).values())
+
+  const nestedData = d3.nest()
+      .key(d => d.site)
+      .sortKeys(d3.ascending)
+      .key(d => d.variety)
+      .sortValues((a,b) => { return a.year - b.year })
+      .rollup((values) => {
+          return {
+           yoy: values[1].yield - values[0].yield,
+           yoyPercent: values[1].yield / values[0].yield - 1
+          }
+        })
+      .entries(dataset);
+
+    const svg = d3.select("body").selectAll("svg")
+        .data(nestedData)
+      .enter().append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    svg.append("text")
+       .attr("class", "title")
+       .text(d => d.key)
+
+    svg.append("g")
+       .attr("class", "x axis")
+       .attr("transform", `translate(0, ${height})`)
+       .call(xAxis)
+
+    svg.append("g")
+       .attr("class", "y axis")
+       .call(yAxis)
+
+    svg.selectAll(".variety-rect")
+       .data(d => d.values)
+      .enter().append("rect")
+        .attr("class", "variety-rect")
+        .attr("x", d => xScale(d.key))
+        .attr("width", d => xScale.bandwidth())
+        .style("fill", d => colorScale(d.value.yoy))
+        .attr("y", (d) => { 
+          return d.value.yoy > 0 ? 
+                yScale(d.value.yoy) : 
+                yScale(0); 
+        })
+        .attr("height", (d) => {  
+          return d.value.yoy > 0 ? 
+                height - yScale(0) - yScale(d.value.yoy) : 
+                yScale(d.value.yoy) - yScale(0); 
+          })
+
+    // svg.selectAll(".variety-circle")
+    //    .data(d => d.values)
+    //   .enter().append("circle")
+    //     .attr("class", "variety-circle")
+    //     .attr("cx", d => xScale(d.key))
+    //     .attr("cy", d => yScale(d.value.yoy))
+    //     .attr("r", 10)
+
+
+    // svg.selectAll(".variety-rect")
+    //    .data(d => d.values)
+    //   .enter().append("rect")
+    //     .attr("class", "variety-rect")
+    //     .attr("x", d => xScale(d.key))
+    //     .attr("y", d => 0)
+    //     .attr("width", d => 10)
+    //     .attr("height", d => yScale(d.value.yoy))
+
+  });
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+

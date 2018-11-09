@@ -33,8 +33,6 @@ var xScale = d3.scaleBand()
     .padding([.1])
     .rangeRound([0, width])
 
-
-
 var colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
 d3.tsv("barley.tsv", ready)

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+
+<style type="text/css">
+
+svg {
+    border: 1px solid #000;
+}
+
+.variety-line {
+  stroke: steelblue;
+  stroke-width: 2;
+  stroke-dasharray: 4, 4;
+}
+
+.y .domain {
+  stroke: none;
+}
+
+
+</style>
+
+<body>
+</body>
+
+<script>
+
+  const width = 600,
+        height = 300,
+        margin = {top: 30, bottom: 80, left: 30, right: 60};
+
+  const xScale = d3.scaleBand()
+      .padding([.25])
+      .range([0, width]);
+
+  const xAxis = d3.axisBottom(xScale)
+
+  const yScale = d3.scaleLinear()
+      .domain([0, 67])
+      .range([height, 0]);
+
+  const colorScale = d3.scaleOrdinal()
+      .domain(['1931', '1932'])
+      .range(['orange', 'steelblue'])
+
+  const yAxis = d3.axisLeft(yScale)
+      .tickSize(-width);
+  const yAxisRight = d3.axisRight(yScale);
+
+  d3.tsv("barley.tsv").then(dataset => {
+
+  xScale.domain(d3.set(dataset.map(d => d.variety)).values())
+
+  const nestedData = d3.nest()
+      .key(d => d.site)
+      .sortKeys(d3.ascending)
+      .key(d => d.variety)
+      // .sortValues((a,b) => { return a.year - b.year })
+      .entries(dataset);
+
+      // SIX SITES 
+    const svg = d3.select("body").selectAll("svg")
+        .data(nestedData)
+      .enter().append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    svg.append("text")
+       .attr("class", "title")
+       .text(d => d.key)
+
+    svg.append("g")
+       .attr("class", "x axis")
+       .attr("transform", `translate(0, ${height})`)
+       .call(xAxis)
+       .selectAll("text")
+       .attr("transform","rotate(-45, 0, 0)")
+       .attr("dx", -20)
+
+    svg.append("g")
+       .attr("class", "y axis")
+       .call(yAxis)
+
+       // TEN VARIETIES
+    const varietyGroups = svg.selectAll(".variety-group")
+       .data(d => d.values)
+      .enter().append("g")
+        .attr("class", "variety-group")
+        .attr("transform", d => `translate(${xScale(d.key)},0)`)
+
+    const yearScale = d3.scaleBand()
+        // .padding([.2])
+        .domain(['1931', '1932'])
+        .range([0, xScale.bandwidth()]);
+
+    // TWO YEARS
+    varietyGroups.selectAll(".variety-rect")
+       .data(d => d.values)
+      .enter().append("rect")
+        .attr("class", "variety-rect")
+        .attr("width", yearScale.bandwidth())
+        .attr("x", d => yearScale(d.year))
+        .attr("height", d => height - yScale(d.yield))
+        .attr("y", d => yScale(d.yield))
+        .style("fill", d => colorScale(d.year))
+
+    var legend = svg.selectAll(".legend")
+        .data(colorScale.domain())
+      .enter().append("g")
+        .attr("class", "legend")
+        .attr("transform", function(d, i) { return "translate(" + i * 50 + ", 0)"; });
+
+    legend.append("rect")
+        .attr("x", width - 18)
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", colorScale)
+
+    legend.append("text")
+        .attr("x", width - 20)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .style("text-anchor", "end")
+        .text(function(d) { return d; });
+  });
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+

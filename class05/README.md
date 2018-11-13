@@ -1,6 +1,7 @@
 # Class 5: Line charts, working with nested data
 
 ## Housekeeping
+  * No class this Thursday!
   * Show + tell?
   * Useful API references:
     * [d3.nest](https://github.com/d3/d3-collection#nests) - a utility for nesting an array of data. Experiment with [Mister Nester](http://bl.ocks.org/shancarter/raw/4748131/).

@@ -3,14 +3,11 @@
 ## Housekeeping
 * Show + tell?
 * Useful API references:
-  * [d3.nest](https://github.com/mbostock/d3/wiki/Arrays#nest) - a utility for nesting an array of data. Experiment with [Mister Nester](http://bl.ocks.org/shancarter/raw/4748131/).
-  * [d3.line](https://github.com/mbostock/d3/wiki/SVG-Shapes#line) - a utility we haven't explored yet for generating an [SVG path string](http://www.w3schools.com/svg/svg_path.asp).
-  * [Operating on Selections](https://github.com/mbostock/d3/wiki/Selections#operating-on-selections)
-  * [Nested Selections](https://bost.ocks.org/mike/nest/)
+  * [d3.nest](https://github.com/d3/d3-collection#nests) - a utility for nesting an array of data. Experiment with [Mister Nester](http://bl.ocks.org/shancarter/raw/4748131/).
+  * [d3.line](https://github.com/d3/d3-shape#lines) - a utility we haven't explored yet for generating an [SVG path string](http://www.w3schools.com/svg/svg_path.asp).
 * Observable
   * Awesome for design
   * Great for comparing code
-
 
 * Goals for today
   * Improve skills with d3.nest()
@@ -44,9 +41,7 @@ Mostly we've worked with `circle` and `rect` elements, but the `path` element, w
   * [American Middle Class is No Longer the World’s Richest](http://www.nytimes.com/2014/04/23/upshot/the-american-middle-class-is-no-longer-the-worlds-richest.html?abt=0002&abg=0)
 
 ## About SVG paths and lines
-Let's take a look at [the documentation](http://www.w3.org/TR/SVG/paths.html) for paths and [lines](https://www.w3schools.com/graphics/svg_line.asp)
-
-[This](roadtolarissa.com/blog/2015/02/22/svg-path-strings/) is helpful, too.
+Let's take a look at [the documentation](https://www.w3schools.com/graphics/svg_path.asp) for paths and [lines](https://www.w3schools.com/graphics/svg_line.asp)
 
 ## Lab, part II
 The Upshot launched with a large story using a study by the Luxembourg Income Study (LIS) that included cross-country comparisons for a variety of income levels in a handful of countries. The Times focused on comparing middle-class incomes, publishing a front-page story titled [The American Middle Class Is No Longer the World’s Richest](http://www.nytimes.com/2014/04/23/upshot/the-american-middle-class-is-no-longer-the-worlds-richest.html?abt=0002&abg=0). We’ll work with [the data used in that story](http://www.lisdatacenter.org/resources/other-databases/) today. 
@@ -100,12 +95,15 @@ Here's our first goal:
   <img src="images/step-7.png">
 
 
-## Thoughts for Wednesday
-Based on some of our talks about what to do with complex forms on the web -- particularly on small devices -- here are some examples that use layering, which *can* work well on tiny devices. (Check out both on mobile and desktop.)
+## Thoughts for Next Week
+
+#### Mobile
+Designing a visualization that works for both mobile and desktop is hard. Take a look at these examples that I think do a great job. *Note how to view on Mobile with Chrome developer tools*
 
   - [A 3-D View of a Chart That Predicts The Economic Future: The Yield Curve](http://www.nytimes.com/interactive/2015/03/19/upshot/3d-yield-curve-economic-growth.html)
   - [The Facebook Offering: How It Compares](http://www.nytimes.com/interactive/2012/05/17/business/dealbook/how-the-facebook-offering-compares.html)
   - [Fewer Helmets, More Deaths](http://www.nytimes.com/interactive/2014/03/31/science/motorcycle-helmet-laws.html)
   - [The Tenure Pipeline at Harvard Business School](http://www.nytimes.com/2013/09/08/education/harvard-case-study-gender-equity.html?ref=education)
 
-Read through [this code](https://bl.ocks.org/mbostock/34f08d5e11952a80609169b7917d4172) and try to understand what each piece does.
+#### Next Level Stuff
+Read through [this code](https://bl.ocks.org/mbostock/34f08d5e11952a80609169b7917d4172) and try to understand what each piece does. It's not a simple visualization, so try to get it running locally and try commenting out section to see what it does. 

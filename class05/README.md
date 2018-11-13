@@ -1,20 +1,19 @@
 # Class 5: Line charts, working with nested data
 
 ## Housekeeping
-* Show + tell?
-* Useful API references:
-  * [d3.nest](https://github.com/d3/d3-collection#nests) - a utility for nesting an array of data. Experiment with [Mister Nester](http://bl.ocks.org/shancarter/raw/4748131/).
-  * [d3.line](https://github.com/d3/d3-shape#lines) - a utility we haven't explored yet for generating an [SVG path string](http://www.w3schools.com/svg/svg_path.asp).
-* Observable
-  * Awesome for design
-  * Great for comparing code
-
-* Goals for today
-  * Improve skills with d3.nest()
-  * Familiarize ourselves with line charts and the `path` and `line` SVG elements
-  * Learn to recognize hierarchical data when we see it
-  * Create and manipulate nested data
-  * Work on the 'fiddly bits' of charts -- the last 10 percent
+  * Show + tell?
+  * Useful API references:
+   * [d3.nest](https://github.com/d3/d3-collection#nests) - a utility for nesting an array of data. Experiment with [Mister Nester](http://bl.ocks.org/shancarter/raw/4748131/).
+   * [d3.line](https://github.com/d3/d3-shape#lines) - a utility we haven't explored yet for generating an [SVG path string](http://www.w3schools.com/svg/svg_path.asp).
+  * Observable
+   * Awesome for design
+   * Great for comparing code
+  * Goals for today
+   * Improve skills with d3.nest()
+   * Familiarize ourselves with line charts and the `path` and `line` SVG elements
+   * Learn to recognize hierarchical data when we see it
+   * Create and manipulate nested data
+   * Work on the 'fiddly bits' of charts -- the last 10 percent
 
 ## Lab, Part I: Let's review the barley
 Before we go through line charts, let's review the work that we did with the barley. I'd like to focus on how the data is structured like the visualization. 
@@ -23,22 +22,22 @@ Before we go through line charts, let's review the work that we did with the bar
 Mostly we've worked with `circle` and `rect` elements, but the `path` element, which power line charts, is slightly different. First, about line charts:
 
 * Strengths of line charts
-  * A charting workhorse
-  * Ideal for comparing relationships over time
-  * Generally better than bar charts if you're comparing more than two series 
+ * A charting workhorse
+ * Ideal for comparing relationships over time
+ * Generally better than bar charts if you're comparing more than two series 
 
 * Common mistakes
-  * Legends when they are not necessary (dynamic labels can be a headache too though)
-  * Dual Axes
-  * 3D charts (except when it's not a mistake)
+ * Legends when they are not necessary (dynamic labels can be a headache too though)
+ * Dual Axes
+ * 3D charts (except when it's not a mistake)
 
 * Examples of NYT line charts, (not all made using D3):
-  * [The Jobless Rate for People Like You](http://www.nytimes.com/interactive/2009/11/06/business/economy/unemployment-lines.html) 
-  * [Recovering, But at Different Paces](http://www.nytimes.com/interactive/2012/11/27/us/recovering-but-at-different-paces.html?ref=us)
-  * [Case Shiller Home Prices Interactive](http://www.nytimes.com/interactive/2014/01/23/business/case-shiller-slider.html)
-  * [Why Peyton Manning’s Record Will Be Hard to Beat](http://www.nytimes.com/interactive/2014/10/19/upshot/peyton-manning-breaks-touchdown-passing-record.html)
-  * [How Likely is it that Birth Control Could Let You Down?](http://www.nytimes.com/interactive/2014/09/14/sunday-review/unplanned-pregnancies.html)
-  * [American Middle Class is No Longer the World’s Richest](http://www.nytimes.com/2014/04/23/upshot/the-american-middle-class-is-no-longer-the-worlds-richest.html?abt=0002&abg=0)
+ * [The Jobless Rate for People Like You](http://www.nytimes.com/interactive/2009/11/06/business/economy/unemployment-lines.html) 
+ * [Recovering, But at Different Paces](http://www.nytimes.com/interactive/2012/11/27/us/recovering-but-at-different-paces.html?ref=us)
+ * [Case Shiller Home Prices Interactive](http://www.nytimes.com/interactive/2014/01/23/business/case-shiller-slider.html)
+ * [Why Peyton Manning’s Record Will Be Hard to Beat](http://www.nytimes.com/interactive/2014/10/19/upshot/peyton-manning-breaks-touchdown-passing-record.html)
+ * [How Likely is it that Birth Control Could Let You Down?](http://www.nytimes.com/interactive/2014/09/14/sunday-review/unplanned-pregnancies.html)
+ * [American Middle Class is No Longer the World’s Richest](http://www.nytimes.com/2014/04/23/upshot/the-american-middle-class-is-no-longer-the-worlds-richest.html?abt=0002&abg=0)
 
 ## About SVG paths and lines
 Let's take a look at [the documentation](https://www.w3schools.com/graphics/svg_path.asp) for paths and [lines](https://www.w3schools.com/graphics/svg_line.asp)
@@ -58,15 +57,15 @@ Here's our first goal:
 <img src="images/step-1.png">
 
 * Recall our checklist from week 3 and the d3 margin conventions we always like to borrow.
-  * Navigate to your working directory, create an `index.html` file with D3 loaded and start a local server
-  * Load your data
-  * Add an SVG on the page.
-  * Format your data, adding fields as necessary
-  * Do your data join
-  * Position your elements 
-  * Add an axis
-  * Add styles
-  * Other customizations, "fiddly bits"
+ * Navigate to your working directory, create an `index.html` file with D3 loaded and start a local server
+ * Load your data
+ * Add an SVG on the page.
+ * Format your data, adding fields as necessary
+ * Do your data join
+ * Position your elements 
+ * Add an axis
+ * Add styles
+ * Other customizations, "fiddly bits"
 * Next, make the same chart, but instead we want to include all the other countries as a reference.Let's use d3.nest()!
 * Our goal is something like this. Think about what elements you would need to make that.
 

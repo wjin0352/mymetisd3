@@ -7,40 +7,6 @@ body {
   font: 12px sans-serif;
 }
 
-svg {
-  overflow: visible;
-}
-
-.income-line {
-  fill: none;
-  stroke-width: 1.5;
-  stroke:  steelblue;
-}
-
-.income-label {
-  text-anchor: end;
-  font: 12px sans-serif;
-  fill: gray;
-}
-
-.incomePoints {
-  fill: steelblue;
-  stroke: #ffffff;
-}
-
-.axis .tick line {
-  stroke: lightgray;
-  stroke-dasharray: 2;
-}
-
-.axis .tick text {
-  fill: gray;
-}
-
-.axis path {
-  stroke: none;
-}
-
 </style>
 
 <body>
@@ -48,162 +14,34 @@ svg {
   </div>
 </body>
 
-<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
 <script>
 
-//  CHECKLIST 
-//  * Axes - x and y DONEZO 
-//  * Scales - linearScale (y), timeScale (x) DONEZO 
-//  * A blue line (steelblue)
-//  * Gridlines - light gray with dashes Semi-done  
-//  * circles (dots) - fill of steelblue with white stroke 
-// * Title 
+var margin = {top: 0, right: 10, bottom: 25, left: 0};
 
-var margin = {top: 20, right: 50, bottom: 25, left: 80};
-
-var width = 800 - margin.left - margin.right,
+var width = 80 - margin.left - margin.right,
    height = 400 - margin.top - margin.bottom;
 
 var yScale = d3.scaleLinear()
     .range([height, 0]);
 
-var xScale = d3.scaleUtc()
+var xScale = d3.scaleLinear()
     .range([0, width]);
 
-var xAxis = d3.axisBottom(xScale)
-    .tickSize(-height);
+d3.csv("incomes.csv").then(ready);
 
-var numberFormat = d3.format("$.2f")
-
-var yAxis = d3.axisRight(yScale)
-    .tickSize(-width)
-    .tickFormat(numberFormat);
-
-var dateParse = d3.utcParse("%Y"),
-    formatDate = d3.utcFormat("%Y");
-
-var lineGenerator = d3.line()
-    // .curve(d3.curveCardinal)
-    .x(function(d) { return xScale(d.year) })
-    .y(function(d) { return yScale(d.val )});
-
-var svg = d3.select("body")
-    .append("svg")
-   .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-d3.csv("incomes.csv", ready);
-
-function ready(err, data) {
-  
-  if (err) throw err;
+function ready(data) {
 
   // format your data
   data.forEach(function (d) {
       d.val = +d.val;
-      d.year = dateParse(d.year);
-      d.formattedDate = formatDate(d.year);
+      d.year = +d.year;
   });
 
-  var medianData = data.filter(function(d) { return d.cutoff == "cop50" })
-  window.myData = medianData;
-
-
-  xScale.domain(d3.extent(data, function(d) { return d.year }));
-  yScale.domain([0, d3.max(medianData, function(d) { return d.val })*1.1]).nice();
-  // yScale.domain([0, 100000]).nice();
-  
-  var nestedMediaData = d3.nest()
-    .key(function(d) { return d.country })
-    .entries(medianData);
-
-  console.log(nestedMediaData);
-
-  svg.append("g")
-    .attr("class","y axis")
-    .attr("transform", "translate(" + width + ", 0)")
-    .call(yAxis)
-
-  svg.append("g")
-    .attr("class", "x axis")
-    .attr("transform", "translate(0," + height + ")")
-    .call(xAxis)
-
-   svg.selectAll(".income-line")
-       .data(nestedMediaData)
-      .enter().append("path")
-       .attr("class", "income-line country")
-       .attr("d", function(d) { return lineGenerator(d.values) });
-
-   svg.selectAll(".income-label")
-       .data(nestedMediaData)
-      .enter().append("text")
-        .attr("class", "income-label country")
-        .text(function(d) { return d.key })
-        .attr("dy", 3)
-        .attr("y", function(d) { return yScale(d.values[0].val) })
-        .attr("x", function(d) { return xScale(d.values[0].year) })
-
-    svg.selectAll(".country")
-      .on("mouseenter", function(selectedData) {
-
-        var newMedianData = medianData.filter(function(d) { return d.country == selectedData.key})
-        yScale.domain(d3.extent(newMedianData, function(d) { return d.val }))
-
-
-        var t = d3.transition()
-          .duration(1000)
-          .ease(d3.easeLinear);
-
-        svg.select(".y")
-          .transition(t)
-          .call(yAxis);
-
-          svg.selectAll(".country")
-          .transition(t)
-            .filter(function(d) { return d.key != selectedData.key})
-            .attr("d", function(d) { return lineGenerator(d.values) })
-            .style("opacity", .5)
-
-        svg.selectAll(".income-label")
-          .transition(t)
-          .attr("y", function(d) { return yScale(d.values[0].val) })
-          .attr("x", function(d) { return xScale(d.values[0].year) })
-
-          svg.selectAll(".country")
-          .transition(t)
-            .filter(function(d) { return d.key == selectedData.key})
-            .attr("d", function(d) { return lineGenerator(d.values) })
-            .style("opacity", 1)
-
-
-
-      })
-      .on("mouseleave", function(selectedData) {
-
-          svg.selectAll(".country")
-            .style("opacity", 1)
-      } )
-
-    // svg.selectAll("incomePoints")
-    //     .data(usMedianData)
-    //   .enter().append("circle")
-    //     .attr("class", "incomePoints")
-    //     .attr("cx", function(d) { return xScale(d.year) })
-    //     .attr("cy", function(d) { return yScale(d.val) })
-    //     .attr("r", 5);
-
- 
+  console.log(data)
 
 }
 
 </script>
-
-
-
-
-
 
 

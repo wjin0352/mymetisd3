@@ -41,7 +41,7 @@ body {
   </div>
 </body>
 
-<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
 <script>
 
 var margin = {top: 0, right: 10, bottom: 25, left: 0};
@@ -71,11 +71,9 @@ var line = d3.line()
     .y(function(d) { return yScale(d.val); })
     .curve(d3.curveBasis)
 
-d3.csv("incomes.csv", ready);
+d3.csv("incomes.csv").then(ready);
 
-function ready(err, data) {
-  
-  if (err) throw err;
+function ready(data) {
 
   // format your data
   data.forEach( function (d) {

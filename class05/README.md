@@ -1,13 +1,16 @@
-#Class 5: Line charts, working with nested data
+# Class 5: Line charts, working with nested data
 
 ## Housekeeping
 * Show + tell?
-* Future Classes - Ideas!
 * Useful API references:
   * [d3.nest](https://github.com/mbostock/d3/wiki/Arrays#nest) - a utility for nesting an array of data. Experiment with [Mister Nester](http://bl.ocks.org/shancarter/raw/4748131/).
-  * [d3.svg.line](https://github.com/mbostock/d3/wiki/SVG-Shapes#line) - a utility we haven't explored yet for generating an [SVG path string](http://www.w3schools.com/svg/svg_path.asp).
+  * [d3.line](https://github.com/mbostock/d3/wiki/SVG-Shapes#line) - a utility we haven't explored yet for generating an [SVG path string](http://www.w3schools.com/svg/svg_path.asp).
   * [Operating on Selections](https://github.com/mbostock/d3/wiki/Selections#operating-on-selections)
   * [Nested Selections](https://bost.ocks.org/mike/nest/)
+* Observable
+  * Awesome for design
+  * Great for comparing code
+
 
 * Goals for today
   * Improve skills with d3.nest()
@@ -16,8 +19,8 @@
   * Create and manipulate nested data
   * Work on the 'fiddly bits' of charts -- the last 10 percent
 
-## Lab, Part I: Again with the barley
-We're almost done with barley (I promise) but let's review what we did with functions and see if we can remake our charts using d3.nest(). Let's render the charts from top to bottom (or left to right, whatever) by mean yield of all varieties per site.
+## Lab, Part I: Let's review the barley
+Before we go through line charts, let's review the work that we did with the barley. I'd like to focus on how the data is structured like the visualization. 
 
 ## Line charts
 Mostly we've worked with `circle` and `rect` elements, but the `path` element, which power line charts, is slightly different. First, about line charts:
@@ -59,8 +62,7 @@ We'll make four charts of increasing complexity today.
 Here's our first goal:
 <img src="images/step-1.png">
 
-1. Recall our checklist from week 3 and the d3 margin conventions we always like to borrow.
-
+* Recall our checklist from week 3 and the d3 margin conventions we always like to borrow.
   * Navigate to your working directory, create an `index.html` file with D3 loaded and start a local server
   * Load your data
   * Add an SVG on the page.
@@ -70,14 +72,12 @@ Here's our first goal:
   * Add an axis
   * Add styles
   * Other customizations, "fiddly bits"
-
-2. Next, make the same chart, but instead we want to include all the other countries as a reference.Let's use d3.nest()!
-
-3. Our goal is something like this. Think about what elements you would need to make that.
+* Next, make the same chart, but instead we want to include all the other countries as a reference.Let's use d3.nest()!
+* Our goal is something like this. Think about what elements you would need to make that.
 
 <img src="images/step-2.png">
 
-4. The chart we just made isn't helpful if we care about knowing which countries are which. Your nested data does not need to change, but you will need to restructure your code to make a chart for each country. Let's say we want to compare middle-class incomes of the U.S. to the following countries:
+* The chart we just made isn't helpful if we care about knowing which countries are which. Your nested data does not need to change, but you will need to restructure your code to make a chart for each country. Let's say we want to compare middle-class incomes of the U.S. to the following countries:
 
   ```
   var compareCountries = ["United Kingdom", "Norway", "Germany", "Canada", "Netherlands", "France", "Sweden", "Ireland", "Spain"]
@@ -87,7 +87,7 @@ Here's our first goal:
   <img src="images/step-3.png">
 
 
-5. Finally, a look forward to next class: a comparison of the full distribution at each income level, highlighting the US in each. 
+* Finally, a look forward to next class: a comparison of the full distribution at each income level, highlighting the US in each. 
 
   <img src="images/step-4.png">
 

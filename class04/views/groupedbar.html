@@ -53,12 +53,6 @@ svg {
       .sortKeys(d3.ascending)
       .key(d => d.variety)
       .sortValues((a,b) => { return a.year - b.year })
-      .rollup((values) => {
-          return {
-           yoy: values[1].yield - values[0].yield,
-           yoyPercent: values[1].yield / values[0].yield - 1
-          }
-        })
       .entries(dataset);
 
     const svg = d3.select("body").selectAll("svg")
@@ -81,42 +75,19 @@ svg {
     svg.append("g")
        .attr("class", "y axis")
        .call(yAxis)
+    // TEN YEARS
+    const varietyGroups = svg.selectAll(".variety-group")
+       .data(d => d.values)
+      .enter().append("g")
+        .attr("class", "variety-group")
+        .attr("transform", d => `translate(${xScale(d.key)},0)`)
 
-    svg.selectAll(".variety-rect")
+    // TWO YEARS
+    varietyGroups = svg.selectAll(".variety-rect")
        .data(d => d.values)
       .enter().append("rect")
         .attr("class", "variety-rect")
-        .attr("x", d => xScale(d.key))
-        .attr("width", d => xScale.bandwidth())
-        .style("fill", d => colorScale(d.value.yoy))
-        .attr("y", (d) => { 
-          return d.value.yoy > 0 ? 
-                yScale(d.value.yoy) : 
-                yScale(0); 
-        })
-        .attr("height", (d) => {  
-          return d.value.yoy > 0 ? 
-                height - yScale(0) - yScale(d.value.yoy) : 
-                yScale(d.value.yoy) - yScale(0); 
-          })
 
-    // svg.selectAll(".variety-circle")
-    //    .data(d => d.values)
-    //   .enter().append("circle")
-    //     .attr("class", "variety-circle")
-    //     .attr("cx", d => xScale(d.key))
-    //     .attr("cy", d => yScale(d.value.yoy))
-    //     .attr("r", 10)
-
-
-    // svg.selectAll(".variety-rect")
-    //    .data(d => d.values)
-    //   .enter().append("rect")
-    //     .attr("class", "variety-rect")
-    //     .attr("x", d => xScale(d.key))
-    //     .attr("y", d => 0)
-    //     .attr("width", d => 10)
-    //     .attr("height", d => yScale(d.value.yoy))
 
   });
 

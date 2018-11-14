@@ -90,6 +90,8 @@ function drawChart(siteName, data) {
     .attr("class", "variety-line")
     .attr("x1", d => xScale('1931'))
     .attr("x2", d => xScale('1932'))
+    .transition().duration(1500)
+
     .attr("y1", d => yScale(lastYearValues[d]))
     .attr("y2", d => yScale(thisYearValues[d]))
 

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style type="text/css">
+
+body {
+  font: 12px sans-serif;
+}
+
+
+.country-income {
+  stroke: #000;
+  stroke-width: .5;
+  fill: none;
+}
+
+.USA {
+  stroke: steelblue;
+  stroke-width: 2;
+
+}
+
+.income-charts {
+  display: inline-block;
+}
+
+.y line {
+  stroke-dasharray: 8;
+  stroke: #bfbfbf;
+}
+
+.y path {
+  stroke: none;
+}
+
+
+</style>
+
+<body>
+  <div class="g-chart-container">
+  </div>
+</body>
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script>
+
+var margin = {top: 0, right: 10, bottom: 25, left: 0};
+
+var width = 80 - margin.left - margin.right,
+   height = 400 - margin.top - margin.bottom;
+
+var yScale = d3.scaleLinear()
+    .range([height, 0]);
+
+var xScale = d3.scaleLinear()
+    .range([0, width]);
+
+var xAxis = d3.axisBottom(xScale)
+    .tickPadding(8)
+    .ticks(2)
+    .tickFormat(d3.format(""))
+    .tickValues([1978, 2010]);
+
+var yAxis = d3.axisRight(yScale)
+    .tickSize(-width)
+    .tickPadding(8)
+    .tickFormat(d3.format("$.0s"));
+
+var line = d3.line()
+    .x(function(d) { return xScale(d.year); })
+    .y(function(d) { return yScale(d.val); })
+    .curve(d3.curveBasis)
+
+d3.csv("incomes.csv").then(ready);
+
+function ready(data) {
+
+  // format your data
+  data.forEach( function (d) {
+      d.val = +d.val;
+      d.year = +d.year;
+  });
+
+  xScale.domain(d3.extent(data, function(d) { return d.year; }));
+  yScale.domain([0, d3.max(data, function(d) { return d.val; })]);
+
+  incomesByCutoff = d3.nest()
+      .key(function(d) { return d.cutoff; })
+      .key(function(d) { return d.country; })
+      .entries(data)
+
+  var countryChart = d3.select("body").selectAll(".incomes-charts")
+      .data(incomesByCutoff)
+    .enter().append("div")
+      .attr("class", "income-charts");
+
+  countryChart.append("h4")
+      .text(function(d) { return d.key.replace("cop", "") + "th"; });
+
+  var svg = countryChart.append("svg")
+     .attr("width", function(d) { return width + margin.left + (d.key == "cop95" ? 80 : margin.right) })
+     .attr("height", height + margin.top + margin.bottom)
+   .append("g")
+     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + (height) + ")")
+      .call(xAxis)
+      .selectAll("text")
+      .style("text-anchor", function(d) { return d === 1978 ? "start" : "end"; });
+
+  var yChartAxis = svg.append("g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(" + width + ",0)" )
+      .call(yAxis);
+
+  yChartAxis.filter(function(d) { return d.key != "cop95" })
+      .selectAll("text").remove();
+
+
+  yChartAxis.selectAll("line")
+      .filter(function(d, i) { return i == 0 })
+      .remove();
+
+  var countryLineGroup = svg.append("g").selectAll(".country-line-group")
+      .data(function(d) { return d.values; })
+    .enter().append("g")
+      .attr("class", "country-line-group");
+
+  countryLineGroup.append("path")
+      .attr("class", "country-income")
+      .classed("USA", function(d) { return d.key === "United States"; })
+      .attr("d", function(d) { 
+        // var linePoints = [d.values[0], d.values[d.values.length-1]];
+        var linePoints = d.values;
+        return line(linePoints); 
+      });
+
+}
+
+</script>
+
+
+
+
+
+
+
+
+
+    

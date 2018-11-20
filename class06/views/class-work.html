@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style type="text/css">
+
+body {
+  font: 12px sans-serif;
+}
+
+svg {
+  /*border: 1px solid #000;*/
+}
+
+.line {
+  stroke: #000;
+  fill: none;
+  stroke-width: 1;
+}
+
+.dot {
+  stroke: #fff;
+  fill: steelblue;
+}
+
+.States {
+  stroke: steelblue;
+  stroke-width: 3;
+}
+
+.hover {
+  stroke: orange;
+  stroke-width: 5;
+}
+
+</style>
+
+<body>
+  <div class="g-chart-container">
+  </div>
+</body>
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script>
+
+// CHECKLIST 
+// 1. Axes - y and x axes
+// 2. Scales - y and x
+  //  * y - linearScale
+  // * x - scalePoint 
+// 3. Line - one Path
+// 4. Circles on top
+// 5.  ticks styling 
+// 6. styling 
+
+// SVG - DONE
+// Margin Convention - Done
+// Loading in our Data  - Done
+// filter our data - Done
+
+const margin = {top: 20, right: 5, bottom: 30, left: 30};
+
+const width = 120 - margin.left - margin.right,
+      height = 400 - margin.top - margin.bottom,
+      smallLeftMargin = 3;
+
+const yScale = d3.scaleLinear()
+    .range([height, 0]);
+
+const xScale = d3.scalePoint()
+    .range([0, width]);
+
+const lineGenerator = d3.line()
+    .x(d => xScale(d.year))
+    .y(d => yScale(d.val))
+
+
+d3.csv("incomes.csv").then(ready);
+
+function ready(data) {
+
+  // format your data
+  data.forEach(function (d) {
+      d.val = +d.val;
+      d.year = +d.year;
+  });
+
+  const sortedData = data.sort((a,b) => { return a.year - b.year })
+
+  const nestedData = d3.nest()
+      .key(d => d.cutoff)
+      .sortKeys((a,b) => { return (+a.replace("cop","")) - (+b.replace("cop","")) })
+      .key(d => d.country)
+      .entries(sortedData)
+
+  console.log(nestedData)
+
+const svg = d3.select(".g-chart-container")
+    .selectAll("svg")
+    .data(nestedData)
+  .enter().append("svg")
+    .attr("width", (d,i) => width + (i == 0 ? margin.left  : smallLeftMargin) + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",  (d,i) => `translate(${(i == 0 ? margin.left  : smallLeftMargin)}, ${margin.top})`)
+
+  // yScale.domain(d3.extent(filteredData, d => d.val)).nice()
+  yScale.domain([0, d3.max(sortedData, d => d.val)]).nice()
+  xScale.domain(d3.set(sortedData.map(d => d.year)).values())
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", `translate(0, ${height})`)
+      .call(d3.axisBottom(xScale).tickValues(d3.extent(sortedData, d => d.year)))
+      .selectAll("text")
+      .style("text-anchor", (d, i) => i == 0 ? 'start' : 'end')
+
+  svg.filter((d, i) => i == 0)
+      .append("g")
+      .attr("class", "y axis")
+      .call(d3.axisLeft(yScale).tickFormat(d3.format(".2s")))
+
+  svg.selectAll(".line")
+    .data(d => d.values)
+  .enter().append("path")
+    .attr("d", d => lineGenerator(d.values))
+    .attr("class", d => `line ${d.key}`)
+    .on("mouseover", d => {
+
+      d3.selectAll(".line")
+        .filter(e => e.key == d.key)
+        .classed("hover", true)
+
+    }).on("mouseout", d => {
+
+      d3.selectAll(".line")
+        .filter(e => e.key == d.key)
+        .classed("hover", false)
+
+    })
+    // .filter((d, i) => d.key == 'United States')
+    // .style("stroke", "steelblue")
+    // .style("stroke-width", "3")
+    // .moveToFront()
+
+
+  // svg.selectAll(".dot")
+  //   .data(filteredData)
+  // .enter().append("circle")
+  //   .attr("class", "dot")
+  //   .attr("cx", d => xScale(d.year))
+  //   .attr("cy", d => yScale(d.val))
+  //   .attr("r", 5)
+}
+
+    // // https://github.com/wbkd/d3-extended
+    // d3.selection.prototype.moveToFront = function() {  
+    //   return this.each(function(){
+    //     this.parentNode.appendChild(this);
+    //   });
+    // };
+
+</script>
+
+
+
+
+
+
+
+
+
+
+

@@ -7,10 +7,9 @@
 
 **Creator** Based on course materials by [Kevin Quealy](https://twitter.com/kevinQ)  
 **Instructor:** [Paul Buffa](twitter.com/pstuffa)  
-**Office Hours:** 7-8 pm on Slack, Sunday nights
+**Office Hours:** 8-9 pm on Slack, Sunday nights
 
 ---
-
 #### Schedule (subject to some change, depending on our needs and skills)
 Week | Tuesday | Thursday
 --- | --- | ---
@@ -18,7 +17,7 @@ Week | Tuesday | Thursday
 2: Mastering Basic Forms | [Class 03: Understanding chart intent; Creating a blueprint for charting in D3; Improving on Excel](https://github.com/thisismetis/nyc18_dataviz11/tree/master/class03)| [Class 04: Abstracting functions, discussing merits of chart forms; d3.nest()](https://github.com/thisismetis/nyc18_dataviz11/tree/master/class04)
 3: Data Sketching & Structures | [Class 05: Line charts, working with nested data](https://github.com/thisismetis/nyc18_dataviz11/tree/master/class05)  | No Class
 4: Data Sketching & Structures cont. |[Class 06: More nested data and working in Observable](https://github.com/thisismetis/nyc18_dataviz11/tree/master/class06)  |  Thanksgiving! No Class
-5: Dynamic Content | Class 07: Reviewing the Fundamentals So Far; Working more with d3.nest()| Class 08: Updating elements: Data joins; interactivity; (possibly) responsive charts
+5: Dynamic Content | [Class 07: Updating elements: Data joins; interactivity; responsive charts](https://github.com/thisismetis/nyc18_dataviz11/tree/master/class07)  | Class 08: Reviewing the Fundamentals So Far; Working more with d3.nest() and data manipulation
 6: Maps | Class 09: Maps, part I | Class 10: Maps, part II
 7: Smorgasbord | Class 11: You Decide! | Class 12: You Decide!
 

@@ -70,6 +70,7 @@ const xScale = d3.scalePoint()
     .range([0, width]);
 
 const lineGenerator = d3.line()
+    // .curve(d3.curveStep)
     .x(d => xScale(d.year))
     .y(d => yScale(d.val))
 
@@ -86,13 +87,22 @@ function ready(data) {
 
   const sortedData = data.sort((a,b) => { return a.year - b.year })
 
+  // const sortedData  = data
+
   const nestedData = d3.nest()
       .key(d => d.cutoff)
       .sortKeys((a,b) => { return (+a.replace("cop","")) - (+b.replace("cop","")) })
       .key(d => d.country)
       .entries(sortedData)
 
+  // const nestedMap = d3.nest()
+  //     .key(d => d.cutoff)
+  //     .sortKeys((a,b) => { return (+a.replace("cop","")) - (+b.replace("cop","")) })
+  //     .key(d => d.country)
+  //     .map(sortedData)
+
   console.log(nestedData)
+  window.nestedData = nestedData;
 
 const svg = d3.select(".g-chart-container")
     .selectAll("svg")
@@ -102,6 +112,9 @@ const svg = d3.select(".g-chart-container")
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform",  (d,i) => `translate(${(i == 0 ? margin.left  : smallLeftMargin)}, ${margin.top})`)
+
+    svg.append("text")
+      .text(d => `${d.key.replace("cop", "")}th %`)
 
   // yScale.domain(d3.extent(filteredData, d => d.val)).nice()
   yScale.domain([0, d3.max(sortedData, d => d.val)]).nice()
@@ -122,7 +135,7 @@ const svg = d3.select(".g-chart-container")
   svg.selectAll(".line")
     .data(d => d.values)
   .enter().append("path")
-    .attr("d", d => lineGenerator(d.values))
+    .attr("d", d => lineGenerator([d.values[0], d.values[d.values.length-1]]) )
     .attr("class", d => `line ${d.key}`)
     .on("mouseover", d => {
 

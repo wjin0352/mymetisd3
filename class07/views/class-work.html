@@ -42,6 +42,11 @@
   max-width: 800px;
 }
 
+.button {
+  background-color: steelblue;
+  color: #fff;
+}
+
 </style>
 
 <body>
@@ -52,20 +57,25 @@
 <script>
 
 const margin = {top: 20, right: 60, bottom: 60, left: 20};
-const width = 800 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+let width = window.innerWidth - margin.left - margin.right,
+    height = window.innerHeight - margin.top - margin.bottom;
 
-const xScale = d3.scaleUtc()
-    .range([0,width])
+const xScale = d3.scaleTime()
+    .range([0, width])
 
 const yScale = d3.scaleLinear()
     .range([height, 0])
 
-const xAxis = d3.axisBottom(xScale)
-    .tickSize(-height);
+const radiusScale = d3.scaleLinear()
+    .domain([100, 1200])
+    .range([3, 20]);
 
-const parseDate = d3.utcParse("%Y"),
-    formatDate = d3.utcFormat("%Y");
+const parseDate = d3.timeParse("%Y"),
+    formatDate = d3.timeFormat("%Y");
+
+const xAxis = d3.axisBottom(xScale)
+    .tickSize(-height)
+    .tickFormat(formatDate);
 
 const yAxis = d3.axisRight(yScale)
     .tickSize(-width)
@@ -93,6 +103,7 @@ d3.csv("incomes.csv").then(data => {
 
   data.forEach(function(d) {
       d.val = +d.val;
+      d.rawYear = d.year
       d.year = parseDate(d.year);
   })
 
@@ -102,6 +113,7 @@ d3.csv("incomes.csv").then(data => {
       .key(function(d) { return d.country; })
       .entries(medianData)
 
+  console.log(nestedMedianData);
   const usData = nestedMedianData.filter(function(d) { return d.key == 'United States'; })
 
   xScale.domain(d3.extent(data, function(d) { return d.year; }))
@@ -118,19 +130,153 @@ d3.csv("incomes.csv").then(data => {
       .call(xAxis)
 
   svg.selectAll(".dots")
-      .data(usData[0].values, function(d) { return d.year })
+      .data(usData[0].values, (d) => d.year)
     .enter().append("circle")
       .attr("class","dots")
       .attr("cx", function(d) { return xScale(d.year); })
       .attr("cy", function(d) { return yScale(d.val); })
-      .attr("r", 5)
+      .attr("r", radiusScale(width))
 
   svg.append("path")
       .datum(usData[0].values)
       .attr("class", "incomeLine")
       .attr("d", incomeLine)
 
+
+  const dropdown = d3.select("#countryButtons")
+    .append("select")
+    .on("change", updateChart)
+
+  dropdown.selectAll(".option")
+    .data(nestedMedianData)
+  .enter().append("option")
+    .attr("class", "option")
+    .text(d => d.key);
+
+  // d3.select("#countryButtons")
+  //   .selectAll(".button")
+  //   .data(nestedMedianData)
+  // .enter().append("button")
+  //   .attr("class", "button")
+  //   .text(d => d.key)
+  //   .on("click", d => updateChart(d))
+
+    function updateChart() {
+
+      console.log(this.value);
+
+      const newData = nestedMedianData.filter(d => d.key == this.value)[0]
+      /// updates the chart
+
+      // axes - X and Y
+      xScale.domain(d3.extent(newData.values, function(d) { return d.year; }))
+      yScale.domain(d3.extent(newData.values, function(d) { return d.val; })).nice()
+
+      svg.select(".y")
+          .transition()
+          .duration(2000)
+          .call(yAxis)
+
+      svg.select(".x")
+          .transition()
+          .duration(2000)
+          .call(xAxis)
+
+      // update the line 
+      svg.select(".incomeLine")
+          .datum(newData.values)
+          .transition()
+          .duration(2000)
+          .attr("d", incomeLine)
+
+      // dots 
+
+     const dotsSelection = svg.selectAll(".dots")
+          .data(newData.values, d => d.year);
+
+    // EXIT - REMOVE
+    dotsSelection.exit()
+      .transition()
+      .duration(2000)
+      .style("opacity", 0)
+      .remove();
+
+    // ENTER - APPEND
+    dotsSelection.enter().append("circle")
+        .attr("class","dots")
+      .merge(dotsSelection)
+        .attr("cx", d => xScale(d.year))
+        .transition()
+        .duration(2000)
+        .attr("cy", d => yScale(d.val))
+        .attr("r", radiusScale(width))
+
+    // UPDATE 
+    // dotsSelection
+    //   .transition()
+    //   .duration(2000)
+    //   .style("fill", "orange")
+    //   .attr("cx", d => xScale(d.year))
+    //   .attr("cy", d => yScale(d.val))
+
+    }
+
+    d3.select(window).on("resize", function() {
+      width = window.innerWidth - margin.left - margin.right;
+      height = window.innerHeight - margin.top - margin.bottom;
+
+      if(width < 500) {
+        height = (height / 2)
+      }
+
+      myResize(width, height);
+    })
+
+    function myResize(width, height) { 
+
+      d3.select("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+
+      svg.select(".background")
+          .attr("height", height)
+          .attr("width", width)
+
+      xScale.range([0, width]);
+      yScale.range([height, 0]);
+
+      svg.select(".y")
+          .attr("transform","translate(" + width + ",0)")
+          .call(yAxis.tickSize(-width))
+
+      svg.select(".x")
+          .attr("transform","translate(0," + height + ")")
+          .call(xAxis.tickSize(-height))
+
+    if(width < 500) {
+      svg.selectAll(".dots").style("opacity", 0)
+    } else {
+      svg.selectAll(".dots")
+          .style("opacity", 1)
+          .attr("cx", function(d) { return xScale(d.year); })
+          .attr("cy", function(d) { return yScale(d.val); })
+          .attr("r", radiusScale(width))
+    }
+    svg.select(".incomeLine")
+        .attr("d", incomeLine)
+    }
+
  });
 
 
 </script>
+
+
+
+
+
+
+
+
+
+

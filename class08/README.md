@@ -42,7 +42,7 @@ As always, let's make checklist for what we need to make this chart, and lets th
   * Updating the results by division
   * Div hover-over objects
 
-One other thing - we're going to load in multiple datasets. Now this is a new process as part of d3 v5. We can read about the changes (here)[https://github.com/d3/d3/blob/master/CHANGES.md].
+One other thing - we're going to load in multiple datasets. Now this is a new process as part of d3 v5. We can read about the changes [here](https://github.com/d3/d3/blob/master/CHANGES.md).
 ```
 async function loadData() {
 
@@ -53,7 +53,7 @@ const dataTwo = await d3.csv("fileTwo.csv");
 }
 
 ```
-The result is something much more similar to observable.
+
 
 ## Lab, Obesrvable Time
 Ok, now that we've done this locally, check out the Observable notebook I made for it. I want you to fork it, and get it to work by -> 

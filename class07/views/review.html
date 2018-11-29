@@ -5,12 +5,12 @@
 <style type="text/css">
  
 .axis line {
-	stroke-opacity: .5;
-	stroke: #fff;
+  stroke-opacity: .5;
+  stroke: #fff;
 }
 
 .axis text {
-	font: 10px sans-serif;
+  font: 10px sans-serif;
 }
 
 .x text {
@@ -23,23 +23,28 @@
 }
 
 .domain {
-	fill: none;
-	stroke: #000;
+  fill: none;
+  stroke: #000;
 }
 
 .dots {
-	fill: steelblue;
+  fill: steelblue;
   stroke: #fff;
 }
 
 .incomeLine {
-	fill: none;
-	stroke: steelblue;
-	stroke-width: 3;
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 3;
 }
 
 #countryButtons {
   max-width: 800px;
+}
+
+.button {
+  background-color: steelblue;
+  color: #fff;
 }
 
 </style>
@@ -52,20 +57,21 @@
 <script>
 
 const margin = {top: 20, right: 60, bottom: 60, left: 20};
-const width = 800 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+let width = window.innerWidth - margin.left - margin.right,
+    height = window.innerHeight - margin.top - margin.bottom;
 
-const xScale = d3.scaleUtc()
-    .range([0,width])
+const xScale = d3.scaleTime()
+    .range([0, width])
 
 const yScale = d3.scaleLinear()
     .range([height, 0])
 
-const xAxis = d3.axisBottom(xScale)
-    .tickSize(-height);
+const parseDate = d3.timeParse("%Y"),
+    formatDate = d3.timeFormat("%Y");
 
-const parseDate = d3.utcParse("%Y"),
-    formatDate = d3.utcFormat("%Y");
+const xAxis = d3.axisBottom(xScale)
+    .tickSize(-height)
+    .tickFormat(formatDate);
 
 const yAxis = d3.axisRight(yScale)
     .tickSize(-width)
@@ -93,6 +99,7 @@ d3.csv("incomes.csv").then(data => {
 
   data.forEach(function(d) {
       d.val = +d.val;
+      d.rawYear = d.year
       d.year = parseDate(d.year);
   })
 
@@ -102,6 +109,7 @@ d3.csv("incomes.csv").then(data => {
       .key(function(d) { return d.country; })
       .entries(medianData)
 
+  console.log(nestedMedianData);
   const usData = nestedMedianData.filter(function(d) { return d.key == 'United States'; })
 
   xScale.domain(d3.extent(data, function(d) { return d.year; }))
@@ -118,7 +126,7 @@ d3.csv("incomes.csv").then(data => {
       .call(xAxis)
 
   svg.selectAll(".dots")
-      .data(usData[0].values, function(d) { return d.year })
+      .data(usData[0].values, (d) => d.year)
     .enter().append("circle")
       .attr("class","dots")
       .attr("cx", function(d) { return xScale(d.year); })
@@ -130,62 +138,115 @@ d3.csv("incomes.csv").then(data => {
       .attr("class", "incomeLine")
       .attr("d", incomeLine)
 
-   const countryButtons = d3.select("#countryButtons")
-      .selectAll(".buttons")
-      .data(nestedMedianData)
-    .enter().append("button")
-      .text(function(d) { return d.key; })
-      .on("click", function(d) { updateChart(d.values); })
 
+  const dropdown = d3.select("#countryButtons")
+    .append("select")
+    .on("change", updateChart)
 
-    // function that updates the chart when a button is clicked (invoked right above!)
-    function updateChart(dataset) {
+  dropdown.selectAll(".option")
+    .data(nestedMedianData)
+  .enter().append("option")
+    .attr("class", "option")
+    .text(d => d.key);
 
-      // updating the y-scale domain
-      yScale.domain(d3.extent(dataset, function(d) { return d.val; })).nice()
+  // d3.select("#countryButtons")
+  //   .selectAll(".button")
+  //   .data(nestedMedianData)
+  // .enter().append("button")
+  //   .attr("class", "button")
+  //   .text(d => d.key)
+  //   .on("click", d => updateChart(d))
 
-      // selecting all the dots and binding the new dataset
-      const dotUpdate = svg.selectAll(".dots")
-          .data(dataset, function(d) { return d.year });
+    function updateChart() {
 
-      // updating the positions of the existing dots
-      dotUpdate.transition()
-            .style("fill","orange")
-            .attr("cx", function(d) { return xScale(d.year); })
-            .attr("cy", function(d) { return yScale(d.val); })
+      console.log(this.value);
 
-      // appending the new dots 
-      dotUpdate.enter().append("circle")
-            .attr("class","dots")
-            .attr("r", 5)
-          .transition()
-            .style("fill","green")
-            .attr("cx", function(d) { return xScale(d.year); })
-            .attr("cy", function(d) { return yScale(d.val); })
+      const newData = nestedMedianData.filter(d => d.key == this.value)[0]
+      /// updates the chart
 
-      // handles old dots that no longer have data bound to it
-      dotUpdate.exit()
-          .style("fill","red")
+      // axes - X and Y
+      xScale.domain(d3.extent(newData.values, function(d) { return d.year; }))
+      yScale.domain(d3.extent(newData.values, function(d) { return d.val; })).nice()
+
+      svg.select(".y")
           .transition()
           .duration(2000)
-          .remove();
+          .call(yAxis)
 
-      // updates the path, our curvy line
+      svg.select(".x")
+          .transition()
+          .duration(2000)
+          .call(xAxis)
+
+      // update the line 
       svg.select(".incomeLine")
-        .datum(dataset)
-        .transition()
-        .duration(2200)
-        .attr("d", incomeLine)
+          .datum(newData.values)
+          .transition()
+          .duration(2000)
+          .attr("d", incomeLine)
 
-      // updates the y axis since its different for each country
-      svg.select(".y")
+      // dots 
+
+     const dotsSelection = svg.selectAll(".dots")
+          .data(newData.values, d => d.year);
+
+    // EXIT - REMOVE
+    dotsSelection.exit()
+      .transition()
+      .duration(2000)
+      .style("opacity", 0)
+      .remove();
+
+    // ENTER - APPEND
+    dotsSelection.enter().append("circle")
+        .attr("class","dots")
+      .merge(dotsSelection)
+        .attr("cx", d => xScale(d.year))
         .transition()
         .duration(2000)
-        .call(yAxis)
+        .attr("cy", d => yScale(d.val))
+        .attr("r", 5)
 
+    // UPDATE 
+    // dotsSelection
+    //   .transition()
+    //   .duration(2000)
+    //   .style("fill", "orange")
+    //   .attr("cx", d => xScale(d.year))
+    //   .attr("cy", d => yScale(d.val))
+
+    }
+
+        d3.select(window).on('resize', function() { 
+        console.log('i changed size!')
+        console.log('inner width and height: ', window.innerWidth, window.innerHeight)
+
+        // recalculate width height
+        // add logic if you need ex. if (height > 500) { height = (height / 2) }        
+        // you can use opacity to hide parts on mobile sizes
+        width = window.innerWidth -margin.left - margin.right,
+        height = window.innerHeight - margin.top - margin.bottom;
+
+        myResize(width, height)
+    });
+
+    function myResize(width, height) {
+    //update all for resize
+    d3.select('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+
+    xScale.range([0, width]);
+    yScale.range([height, 0]);
+
+    svg.select('.y')
+        .call(yAxis)
+    svg.select('.x')
+        .call(xAxis)
+    
     }
 
  });
 
-
 </script>
+

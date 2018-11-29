@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<style type="text/css">
+
+#hoverDiv {
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #000;
+  width: 100px;
+  height: 100px;
+  left: 0px;
+  top: 0px;
+  opacity: 0;
+  pointer-events: none;
+  text-align: center;
+  font: 24px sans-serif;
+}
+
+text {
+  pointer-events: none;
+}
+
+</style>
+
+<body>
+  <div id='divisionButtons'> </div>
+</body>
+
+<script>
+
+const hoverDiv = d3.select("body")
+    .append("div")
+    .attr("id", "hoverDiv");
+
+const margin = {top: 20, right: 20, bottom: 20, left: 150};
+const width = 800 - margin.left - margin.right,
+      height = 800 - margin.top - margin.bottom;
+
+const dateParse = d3.timeParse("%m/%d/%y")
+const monthFormat = d3.timeFormat("%B")
+const dayOfWeekFormat = d3.timeFormat("%A")
+
+const svg = d3.select("body")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+const teamScale = d3.scaleBand()
+    .padding([.1])
+    .range([height, 0])
+           
+const dayOfWeekScale = d3.scaleBand()
+    .domain(['Monday', 'Tuesday', 'Wednesday', 'Thursday','Friday','Saturday', 'Sunday'])
+    
+
+const winScale = d3.scaleSequential(d3.interpolateBlues)
+    .domain([0, 1])
+
+const monthScale = d3.scaleBand()
+    .domain(['October','November','December','January','February','March','April'])
+    .range([0, width])
+         
+const monthAxis = svg.append("g")
+    .call(d3.axisTop(monthScale))
+
+monthAxis.select(".domain").remove()
+
+ready()
+
+async function ready() {
+
+  const nba = await d3.csv("nba.csv");
+  const lookup = await d3.tsv("lookup.tsv");
+
+  console.log(nba, lookup)
+  const lookupMap = {};
+
+  lookup.forEach(d => {
+    lookupMap[d.short_name] = {fullname: d.full_name, division: d.division}
+  })
+
+  nba.forEach(d => {
+    d['team'] = d.TEAM
+    d['team_full'] = lookupMap[d.TEAM].fullname
+    d['division'] = lookupMap[d.TEAM].division
+    d['date'] = dateParse(d.DATE)
+    d['day_of_week'] = dayOfWeekFormat(dateParse(d.DATE))
+    d['month'] = monthFormat(dateParse(d.DATE))
+    d['matchup'] = d.MATCHUP
+    d['W/L'] = d['W/L']
+    d['outcome'] = (d['W/L'] == 'W' ? 1 : 0)
+    d['minutes'] = +d.MIN
+    d['points'] = +d.PTS
+    d['field_goals_made'] = +d.FGM
+    d['field_goals_attempted'] = +d.FGA
+    d['field_goal_percent'] = (+d['FG%'].replace("%",""))/100
+    d['three_point_made'] = +d['3PM']
+    d['three_point_attempt'] = +d['3PM']
+    d['three_point_percent'] = (+d['3P%'].replace("%",""))/100
+    d['rebounds'] = +d.REB
+    d['offensive_rebounds'] = +d.OREB
+    d['defensive_rebounds'] = +d.DREB
+    d['assists'] = +d.AST
+    d['steals'] = +d.STL
+    d['blocks'] = +d.BLK
+    d['turnovers'] = +d.TOV
+  })
+  
+  const nestedData = d3.nest()
+    .key(d => d.division)
+    .key(d => d.team)
+    .key(d => d.day_of_week)
+    .key(d => d.month)
+    .rollup(leaves => {
+      return { win_percent: d3.sum(leaves, d => d.outcome) / leaves.length, 
+               values: leaves,
+               total_points:  d3.sum(leaves, d => d.points)
+             }
+    })
+    .entries(nba)
+
+  const atlantic = nestedData.filter(d => d.key == 'Atlantic')[0].values
+
+  teamScale.domain(atlantic.map(d => d.key))
+  dayOfWeekScale.range([0, teamScale.bandwidth()]);
+
+  const team = svg.selectAll(".team")
+      .data(atlantic, d => d.key)
+    .enter().append("g")
+      .attr("class", "team")
+      .attr("transform", d => `translate(0, ${teamScale(d.key)})`)
+  
+  team.append("text")
+      .style("font", "16px sans-serif")
+      .attr("x", -150)
+      .text(d => d.key)
+  
+  const day = team.selectAll(".day")
+      .data(d => d.values)
+    .enter().append("g")
+      .attr("transform", d => `translate(0, ${dayOfWeekScale(d.key)})`)
+ 
+  day.append("text")
+      .style("font", "14px sans-serif")
+      .attr("x", -100)
+      .text(d => d.key)
+  
+  const month = day.selectAll(".month")
+      .data(d => d.values)
+    .enter().append("g")
+      .attr("class", "month")
+      .attr("transform", d => `translate(${monthScale(d.key)}, 5)`)
+      .on("mouseenter", d => {
+
+        hoverDiv.style("opacity", 1)
+          .style("left", `${d3.event.pageX}px`)
+          .style("top", `${d3.event.pageY}px`)
+          .html(`# of Games: ${d.value.values.length}`);
+
+      })
+      .on("mouseleave", d => {
+        hoverDiv.style("opacity", 0)
+      })
+ 
+  month.append("rect")
+      .attr("y", -dayOfWeekScale.bandwidth())
+      .attr("width", monthScale.bandwidth())
+      .attr("height", dayOfWeekScale.bandwidth())
+      .style("stroke", "#000")
+      .style("fill", d => winScale(d.value.win_percent))
+      
+  month.append("text")
+      .style("font", "12px sans-serif")
+      .attr("x", monthScale.bandwidth() / 2)
+      .attr("y", -dayOfWeekScale.bandwidth() / 4)
+      .style("text-anchor", "middle")
+      .text(d => `${Math.round(d.value.win_percent * 100)}%`)
+      .style("fill", d => d.value.win_percent > .75 ? "#fff" : "#000")
+
+  // Buttons and change
+  const buttons = d3.select("#divisionButtons")
+      .selectAll(".button")
+      .data(nestedData)
+    .enter().append("button")
+      .attr("class", "button")
+      .text(d => d.key)
+      .on("click", d => updateChart(d.values));
+
+  function updateChart(thisDivision) {
+
+    teamScale.domain(thisDivision.map(d => d.key))
+    dayOfWeekScale.range([0, teamScale.bandwidth()]);
+
+    const team = svg.selectAll(".team")
+        .data(thisDivision, d => d.key);
+
+    team.exit().remove();
+
+    const teamEnter = team.enter().append("g")
+        .attr("class", "team")
+        .attr("transform", d => `translate(0, ${teamScale(d.key)})`)
+    
+    teamEnter.append("text")
+        .style("font", "16px sans-serif")
+        .attr("x", -150)
+        .text(d => d.key)
+    
+    const day = teamEnter.selectAll(".day")
+        .data(d => d.values)
+      .enter().append("g")
+        .attr("transform", d => `translate(0, ${dayOfWeekScale(d.key)})`)
+   
+    day.append("text")
+        .style("font", "14px sans-serif")
+        .attr("x", -100)
+        .text(d => d.key)
+    
+    const month = day.selectAll(".month")
+        .data(d => d.values)
+      .enter().append("g")
+        .attr("class", "month")
+        .attr("transform", d => `translate(${monthScale(d.key)}, 5)`)
+        .on("mouseenter", d => {
+
+          hoverDiv.style("opacity", 1)
+            .style("left", `${d3.event.pageX}px`)
+            .style("top", `${d3.event.pageY}px`)
+            .html(`# of Games: ${d.value.values.length}`);
+
+        })
+        .on("mouseleave", d => {
+          hoverDiv.style("opacity", 0)
+        })
+   
+    month.append("rect")
+        .attr("y", -dayOfWeekScale.bandwidth())
+        .attr("width", monthScale.bandwidth())
+        .attr("height", dayOfWeekScale.bandwidth())
+        .style("stroke", "#000")
+        .style("fill", d => winScale(d.value.win_percent))
+        
+    month.append("text")
+        .style("font", "12px sans-serif")
+        .attr("x", monthScale.bandwidth() / 2)
+        .attr("y", -dayOfWeekScale.bandwidth() / 4)
+        .style("text-anchor", "middle")
+        .text(d => `${Math.round(d.value.win_percent * 100)}%`)
+        .style("fill", d => d.value.win_percent > .75 ? "#fff" : "#000")
+  }
+
+}
+
+</script>

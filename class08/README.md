@@ -1,4 +1,4 @@
-# Class 8: Building confidence with hierarchical data, data joins, and updates, responsive charts, interactivity
+# Class 8: Building confidence with hierarchical data, data joins, and updates,  interactivity
 
 ## Housekeeping
 * Any questions?

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<style type="text/css">
+
+#hoverDiv {
+  opacity: 0;
+}
+
+text {
+  pointer-events: none;
+}
+
+</style>
+
+<body>
+  <div id='divisionButtons'> </div>
+</body>
+
+<script>
+
+const hoverDiv = d3.select("body")
+    .append("div")
+    .attr("id", "hoverDiv");
+
+const margin = {top: 20, right: 20, bottom: 20, left: 150};
+const width = 800 - margin.left - margin.right,
+      height = 800 - margin.top - margin.bottom;
+
+const dateParse = d3.timeParse("%m/%d/%y")
+const monthFormat = d3.timeFormat("%B")
+const dayOfWeekFormat = d3.timeFormat("%A")
+
+const svg = d3.select("body")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+ready()
+
+async function ready() {
+
+  const nba = await d3.csv("nba.csv");
+  const lookup = await d3.tsv("lookup.tsv");
+
+  console.log(nba, lookup)
+
+}
+
+</script>

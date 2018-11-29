@@ -56,7 +56,7 @@ const dataTwo = await d3.csv("fileTwo.csv");
 
 
 ## Lab, Obesrvable Time
-Ok, now that we've done this locally, check out the Observable notebook I made for it. I want you to fork it, and get it to work by -> 
+Ok, now that we've done this locally, check out the [Observable notebook](https://beta.observablehq.com/@pstuffa/nba-schedule-heatmap) I made for it. I want you to fork it, and get it to work by -> 
   * Just month for each team
   * Get a dropdown to select different metrics to use for the fill color and text
   * Make a scatterplot to compare two metrics to see how they correlate

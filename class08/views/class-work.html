@@ -6,12 +6,25 @@
 
 #hoverDiv {
   opacity: 0;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  /*width: 100px;*/
+  /*height: 100px;*/
+  padding: 10px;
+  margin: 10px;
+  background-color: lightgray;
+  border: 1px solid #000;
+  pointer-events: none;
 }
 
 text {
   pointer-events: none;
 }
 
+body {
+  font: 12px sans-serif;
+}
 </style>
 
 <body>
@@ -20,17 +33,51 @@ text {
 
 <script>
 
+// CHECKLIST 
+// DATA 
+
+// How to structure it 
+// Nesting =
+// Division - SVG 
+// Team - G & Text
+// day of week - G & Text
+// month - G -> Rectangle & Text
+// 
+// Modify our data to get division, day of week, month name 
+
+// Make an SVG with margin convention
+// 
+// Team Scale - scalePoint
+// Day of Week Scale - scalePoint
+// Month Scale - scaleBand
+// Color Scale - Win Percent / 
+// interpolateBlues
+
 const hoverDiv = d3.select("body")
     .append("div")
     .attr("id", "hoverDiv");
 
-const margin = {top: 20, right: 20, bottom: 20, left: 150};
+const margin = {top: 50, right: 20, bottom: 20, left: 150};
 const width = 800 - margin.left - margin.right,
       height = 800 - margin.top - margin.bottom;
 
 const dateParse = d3.timeParse("%m/%d/%y")
 const monthFormat = d3.timeFormat("%B")
 const dayOfWeekFormat = d3.timeFormat("%A")
+
+const teamScale = d3.scaleBand()
+    .padding([1/10])
+    .range([height, 0])
+
+const dayOfWeekScale = d3.scaleBand()
+    .domain(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+    
+const monthScale = d3.scaleBand()
+    .domain(['October','November', 'December', 'January', 'February', 'March', 'April'])
+    .range([0, width])
+
+const colorScale = d3.scaleSequential(d3.interpolateBlues)
+    .domain([0, 1])
 
 const svg = d3.select("body")
   .append("svg")
@@ -39,15 +86,154 @@ const svg = d3.select("body")
   .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-ready()
+const xAxis = svg.append("g")
+    .call(d3.axisTop(monthScale))
+
+xAxis.selectAll(".domain").remove();
+xAxis.selectAll("line").remove();
 
 async function ready() {
 
   const nba = await d3.csv("nba.csv");
   const lookup = await d3.tsv("lookup.tsv");
 
-  console.log(nba, lookup)
+  console.log(nba, lookup);
+
+  const lookupMap = {};
+  lookup.forEach(row => {
+    lookupMap[row.short_name] = {division: row.division,
+                                 full_name: row.full_name
+                               }
+  })
+
+  nba.forEach(row => {
+    row.division = lookupMap[row.TEAM].division
+    row.parsedDate = dateParse(row.DATE)
+    row.day_of_week = dayOfWeekFormat(dateParse(row.DATE))
+    row.month = monthFormat(dateParse(row.DATE))
+  })
+
+  // const dayOfWeekSort = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+  const nestedData = d3.nest()
+      .key(d => d.division)
+      .key(d => d.TEAM)
+      .key(d => d.day_of_week)
+      // .sortKeys((a,b) => dayOfWeekSort.indexOf(a) - dayOfWeekSort.indexOf(b))
+      .key(d => d.month)
+      .entries(nba);
+
+  nestedData.forEach(division => {
+    division.values.forEach(team => {
+      team.values.forEach(dayOfWeek => {
+        dayOfWeek.values
+        // If the month name is not here, then add it
+        const allMonths = monthScale.domain();
+        allMonths.forEach(month => {
+          if(dayOfWeek.values.map(d => d.key).indexOf(month) < 0) {
+            dayOfWeek.values.push({key: month, did_not_play: true})
+          }
+        })
+      })
+    })
+  })
+
+  console.log(nestedData);
+
+  const nestedTeams = nestedData.filter(d => d.key == 'Atlantic')[0].values
+  teamScale.domain(nestedTeams.map(d => d.key));
+  dayOfWeekScale.range([teamScale.bandwidth(), 0]);
+
+// Division - SVG DONEZO 
+
+// Team - G & Text
+  
+  const teams = svg.selectAll(".team")
+      .data(nestedTeams)
+    .enter().append("g")
+      .attr("class", "team")
+      .attr("transform", d => `translate(0,${teamScale(d.key)})`)
+
+  teams.append("text")
+      // .attr("transform", `rotate(90) translate(0,${teamScale.bandwidth()/2})`)
+      // .style("text-anchor", "middle")
+      .text(d => d.key)
+      .attr("y", dayOfWeekScale.bandwidth())
+      .attr("dy", -dayOfWeekScale.bandwidth()/4)
+      .attr("x", -150);
+
+// day of week - G & Text
+  const days = teams.selectAll(".day")
+      .data(d => d.values)
+    .enter().append("g")
+      .attr("class", "day")
+      .attr("transform", d => `translate(0,${dayOfWeekScale(d.key)})`)
+
+ days.append("text")
+    .text(d => d.key)
+    .attr("y", dayOfWeekScale.bandwidth())
+    .attr("dy", -dayOfWeekScale.bandwidth()/4)
+    .attr("x", -100);
+// month - G -> Rectangle & Text
+  const months = days.selectAll(".month")
+      .data(d => d.values)
+    .enter().append("g")
+      .attr("class", "month")
+      .attr("transform", d => `translate(${monthScale(d.key)}, 0)`)
+      .on("mouseenter", d => {
+        hoverDiv
+          .style("opacity", 1)
+          .style("top",   `${d3.event.pageY}px`)
+          .style("left", `${d3.event.pageX}px`)
+          .html(d.values.map(e => {
+            return `<p>${e.DATE}: ${e['W/L']} </p>`
+          }))
+      })
+      .on("mouseleave", d => {
+        hoverDiv.style("opacity", 0)
+      })
+
+  months.append("rect")
+      .attr("width", monthScale.bandwidth())
+      .attr("height", dayOfWeekScale.bandwidth())
+      .style("fill", d => {
+        if(d.did_not_play == undefined) {
+          const numberOfGames = d.values.length;
+          const numberOfWins = d.values.filter(e => e['W/L'] == 'W').length;
+          const winPercent = numberOfWins / numberOfGames;
+          d.winPercent = winPercent;
+          return colorScale(winPercent)
+        } else {
+          return "pink"
+        }
+      })
+      .style("stroke", "#000")
+
+  months.append("text")
+      .style("text-anchor", "middle")
+      .attr("x", monthScale.bandwidth()/2)
+      .attr("y", dayOfWeekScale.bandwidth())
+      .attr("dy", -dayOfWeekScale.bandwidth()/4)
+      .text(d => d.did_not_play == true ? 'DNP' : `${Math.round(d.winPercent*100)}%`)
+      .style("fill", d => d.winPercent > .75 ? '#fff' : '#000')
 
 }
 
+
+ready()
 </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

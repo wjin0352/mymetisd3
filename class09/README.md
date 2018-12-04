@@ -4,20 +4,20 @@ You could have an entire class on maps and D3: using the command-line tools, U.S
 ## Housekeeping
   
   * Any questions?
-  * [this map](https://bl.ocks.org/mbostock/4060606)
+  * We're doing Stacked Bar Charts & Sankey Charts!
   * Goals for today
     * Discuss the strength of maps as a visualization form
     * How to get shapefiles and convert them into topojson 
     * Geo projections
     * Interaction on maps
 
-## Mini lecture: Mapping and Intent
+## Mapping and Intent
 Just like with charting, mapping is all about what you want to show. There's no such thing as the perfect form, especially with maps. A few examples:
-  
+  * [Basic Choropleth](hhttps://beta.observablehq.com/@mbostock/d3-choropleth)
   * [Presidential vote](http://elections.nytimes.com/2012/results/president)
-  * [Example 2](http://www.nytimes.com/interactive/2012/11/07/us/politics/obamas-diverse-base-of-support.html)
-  * [Example 3](http://www.nytimes.com/interactive/2014/11/04/upshot/senate-maps.html)
-  * [Example 4](http://elections.nytimes.com/2014/results/house), and sometimes [maps shouldn't be maps](http://www.ericson.net/content/2011/10/when-maps-shouldnt-be-maps/)
+  * [An Extremely Detailed Map of the 2016 Election](https://www.nytimes.com/interactive/2018/upshot/election-2016-voting-precinct-maps.html)
+  * [Older Version / Opacities](http://www.nytimes.com/interactive/2014/11/04/upshot/senate-maps.html)
+  * [House maps](http://elections.nytimes.com/2014/results/house), and sometimes [maps shouldn't be maps](http://www.ericson.net/content/2011/10/when-maps-shouldnt-be-maps/)
   * [Pushing the envelope](https://www.flickr.com/photos/dukefifa/6307925837/)
   * Sometimes things are [easier by hand](http://farm9.staticflickr.com/8203/8199825791_e7f7919f8d_o.jpg) though
   * Sometimes they [are not](https://beta.observablehq.com/@fil/map-layers-perspective)

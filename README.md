@@ -18,7 +18,7 @@ Week | Tuesday | Thursday
 3: Data Sketching & Structures | [Class 05: Line charts, working with nested data](https://github.com/thisismetis/nyc18_dataviz11/tree/master/class05)  | No Class
 4: Data Sketching & Structures cont. |[Class 06: More nested data and working in Observable](https://github.com/thisismetis/nyc18_dataviz11/tree/master/class06)  |  Thanksgiving! No Class
 5: Dynamic Content | [Class 07: Updating elements: Data joins; interactivity; responsive charts](https://github.com/thisismetis/nyc18_dataviz11/tree/master/class07)  | [Class 08: Putting it all together; Working more with d3.nest(); general update pattern; observable; interactivity](https://github.com/thisismetis/nyc18_dataviz11/tree/master/class08) 
-6: Maps | [Class 09: Maps, part I](https://github.com/thisismetis/nyc18_dataviz11/tree/master/class09)  | Class 10: Maps, part II
+6: Maps | [Class 09: Maps, part I](https://github.com/thisismetis/nyc18_dataviz11/tree/master/class09)  | [Class 10: Maps, part II](https://github.com/thisismetis/nyc18_dataviz11/tree/master/class10) 
 7: Smorgasbord | Class 11: You Decide! | Class 12: You Decide!
 
 

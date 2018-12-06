@@ -47,7 +47,6 @@ Also, we'll need to create a data object that gives us the drought value given a
 Use d3.nest() or a function and generalize your code to a map for every year. (That's a lot of years.) Something like this:
 <img src="images/Screen Shot 2018-12-06 at 2.26.00 PM.png">
 
-
 ## Lab, part IV
 It could be cool to have a slider input at the top of the page so we could have a user change which year they wanted to look at. How would you do that? Think about the checklist:
  * Create a slider input (type = range)

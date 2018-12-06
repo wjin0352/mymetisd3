@@ -39,7 +39,7 @@ Today we're going to be working with data that's a little different than states 
 ## Lab, part II
 Our goal is to make a map drought severity in the United States as of June 2015. [These breakpoints](http://www.cpc.ncep.noaa.gov/products/analysis_monitoring/regional_monitoring/palmer.gif) may be useful for our color scale's domain, but we can probably do better on the colors – perhaps with [every ColorBrewer scale](http://bl.ocks.org/mbostock/5577023) or the new sequential [color scales](http://bl.ocks.org/pstuffa/d5934843ee3a7d2cc8406de64e6e4ea5)? Or we can use the upshot styling, like this:
 
-<img src="images/Screen Shot 2018-12-06 at 2.25.49 PM.png">
+<img src="images/Screen Shot 2018-12-06 at 2.56.22 PM.png">
 
 Also, we'll need to create a data object that gives us the drought value given a `CLIMDIV` id and year.
 

@@ -54,7 +54,7 @@ It could be cool to have a slider input at the top of the page so we could have 
  * When the slider changes, update the colors of the chart (and maybe text)
 
 ### Homework
-Publish your map! Choose either the maps we worked on Tuesday or today, but publish one of them and send me your notebook. Also, office hours Sunday @ 8:00.
+Publish your map! Choose either the maps we worked on Tuesday or today, but publish one of them and send me your notebook. If you're stuck, you can check out [this notebook I made](https://beta.observablehq.com/@pstuffa/drought-maps). Also, office hours Sunday @ 8:00.
 
 
 

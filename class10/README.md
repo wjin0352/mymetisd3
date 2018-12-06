@@ -23,7 +23,7 @@ Just like we did with charts, we may benefit from a small checklist when making 
 6. Convert topojson back to geoJSON
 7. Define a geo path 
 8. Create your map in SVG using a data join with your geojson features.
-9. Create a link, preferably using a Javascript object, to link your feature attribute ID to your data.
+9. Create a way to link your data to the map, preferably using a Javascript map object, also what we've been calling a "lookup function."
 10. Style your map accordingly.
 
 ## Lab, part I
@@ -45,7 +45,7 @@ Also, we'll need to create a data object that gives us the drought value given a
 
 ## Lab, part III
 Use d3.nest() or a function and generalize your code to a map for every year. (That's a lot of years.) Something like this:
-<img src="images/Screen Shot 2018-12-06 at 2.25.49 PM.png">
+<img src="images/Screen Shot 2018-12-06 at 2.26.00 PM.png">
 
 
 ## Lab, part IV

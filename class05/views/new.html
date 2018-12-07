@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style type="text/css">
+
+body {
+  font: 12px sans-serif;
+}
+
+</style>
+
+<body>
+  <div class="g-chart-container">
+  </div>
+</body>
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script>
+
+var margin = {top: 0, right: 10, bottom: 25, left: 0};
+
+var width = 80 - margin.left - margin.right,
+   height = 400 - margin.top - margin.bottom;
+
+var yScale = d3.scaleLinear()
+    .range([height, 0]);
+
+var xScale = d3.scaleLinear()
+    .range([0, width]);
+
+d3.csv("incomes.csv").then(ready);
+
+function ready(data) {
+
+  // format your data
+  data.forEach(function (d) {
+      d.val = +d.val;
+      d.year = +d.year;
+  });
+
+  console.log(data)
+
+}
+
+</script>
+
+

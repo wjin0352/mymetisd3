@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style type="text/css">
+
+  body {
+    font-family: arial, sans;
+    font-size: 14px;
+  }
+
+</style>
+
+<body>
+  <p id='loading'>It's Loading</p>
+  <div id="chart-container"></div>
+</body>
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://d3js.org/topojson.v1.min.js"></script>
+
+<script type="text/javascript">
+  
+const margin = {top: 5, right: 5, bottom: 5, left: 5};
+const width = 900 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+const colors = ['#c51b7d','#e9a3c9','#fde0ef','#f7f7f7','#e6f5d0','#a1d76a','#4d9221'];
+
+const threshold = d3.scaleThreshold()
+        .domain([-4, -3, -2, 2, 3, 4])
+        .range(colors);
+
+ready();
+
+async function ready() {
+
+  const data = await d3.csv("data/tidy-drought-data.csv");
+  const topojsonData = await d3.json("data/GIS.OFFICIAL_CLIM_DIVISIONS.json");
+
+  d3.select("#loading").text("It's not loading!")
+
+  const climateDivisions = topojson.feature(topojsonData, topojsonData.objects.GIS)
+
+
+}
+
+</script>
+

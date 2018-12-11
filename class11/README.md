@@ -35,7 +35,7 @@ Now, let's apply what we've learned to a more interesting dataset.
 
 I found this [data]("views/population/UNdata_Export_20161019_010544114") on world polations from a [UN website](http://data.un.org/Data.aspx?q=population&d=PopDiv&f=variableID%3a12). It has population counts for each country, by year, with projections for future years. We're going to need to filter the data somewhat, as there is a lot of information. I've also attached a country lookup file for getting regions names from [here](https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes/blob/master/all/all.csv). The goal will be to make something like this:
 
-<img src="images/Screen Shot 2016-10-18 at 10.23.43 PM.png">
+<img src="images/Screen Shot 2018-12-11 at 3.42.34 PM.png">
 
 Download the data locally, start up a new index.html file and a local server. You can copy and paste the work we just did from the simple example or use one of the starter files (under views/population/starter.html)
 * What do we notice about the data?
@@ -47,13 +47,14 @@ Also,
 * Let's use d3.area() to convert our bar chart to an area chart
 * Labels or a legend?
 
-
 If there's time: [Beeswarms!](https://beta.observablehq.com/@mbostock/d3-beeswarm-iii)
 
 
 
+## Homework for Thursday
+* Bring questions, examples, anything you want to discuss one more time with the class!
+* I'd like each of you to share some work you've done. Have a link ready for Thursday!
 
-## Optional reading for Thursday
 
 
 

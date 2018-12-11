@@ -8,6 +8,11 @@
     font-size: 14px;
   }
 
+  .divisions {
+    stroke: #000;
+    stroke-width: .5;
+  }
+
 </style>
 
 <body>
@@ -21,12 +26,12 @@
 <script type="text/javascript">
   
 const margin = {top: 5, right: 5, bottom: 5, left: 5};
-const width = 900 - margin.left - margin.right,
-      height = 500 - margin.top - margin.bottom;
+const width = 200 - margin.left - margin.right,
+      height = 100 - margin.top - margin.bottom;
 
 const colors = ['#c51b7d','#e9a3c9','#fde0ef','#f7f7f7','#e6f5d0','#a1d76a','#4d9221'];
 
-const threshold = d3.scaleThreshold()
+const colorScale = d3.scaleThreshold()
         .domain([-4, -3, -2, 2, 3, 4])
         .range(colors);
 
@@ -37,12 +42,63 @@ async function ready() {
   const data = await d3.csv("data/tidy-drought-data.csv");
   const topojsonData = await d3.json("data/GIS.OFFICIAL_CLIM_DIVISIONS.json");
 
-  d3.select("#loading").text("It's not loading!")
+  d3.select("#loading").remove()
 
   const climateDivisions = topojson.feature(topojsonData, topojsonData.objects.GIS)
+
+  console.log(data, climateDivisions)
+
+  const path = d3.geoPath()
+      .projection(d3.geoAlbersUsa()
+        .fitSize([width, height], climateDivisions))
+
+ const nestedYears = d3.nest()
+    .key(d => d.year)
+    .entries(data);
+
+ const svg  = d3.select("#chart-container")
+    .selectAll("svg")
+    .data(nestedYears.filter(d => +d.key >= 1993))
+  .enter().append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`)
+      .each(function(thisSVGsData) {
+
+        const thisSVG = d3.select(this);
+
+        thisSVG.append("text")
+            .attr("y", 10)
+            .text(d => d.key);
+
+        const dataLookup = {};
+        data.filter(d => d.year == thisSVGsData.key)
+        .forEach(d => {
+          dataLookup[d.id] = d.val
+        })
+
+        thisSVG.selectAll(".divisions")
+            .data(climateDivisions.features)
+          .enter().append("path")
+            .attr("class", "divisions")
+            .attr("d", path)
+            .style("fill", (d) => colorScale(dataLookup[d.properties.CLIMDIV]))
+  })
+
+  
+
 
 
 }
 
 </script>
+
+
+
+
+
+
+
+
 

@@ -191,8 +191,9 @@ let myTimer = d3.interval((elapsed) => {
   if((years.length - 1) == index) {
     myTimer.stop();
   }
-
-  index += 1;
+  if(myRandoVariabile) {
+    index += 1;
+  }
 }, 500)
 
   
@@ -236,3 +237,14 @@ let myTimer = d3.interval((elapsed) => {
 
 </script>
 
+<<<<<<< HEAD
+=======
+
+
+
+
+
+
+
+
+>>>>>>> 933aa9378229b20fcedba52ca26c6f2d94d866d7

@@ -13,6 +13,23 @@
     stroke-width: .5;
   }
 
+  #myTooltip {
+    background-color: #fff;
+    padding: 0px;
+    margin: 5px;
+    border: 1px solid #000;
+    /*opacity: 0;*/
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    pointer-events: none;
+  }
+
+  .tooltip-line {
+    fill: none;
+    stroke: #000;
+  }
+
 </style>
 
 <body>
@@ -29,6 +46,43 @@ const margin = {top: 5, right: 5, bottom: 5, left: 5};
 const width = 900 - margin.left - margin.right,
       height = 500 - margin.top - margin.bottom;
 
+const ttWidth = 300,
+      ttHeight = 200,
+      ttMargin = {top: 5, right: 15, bottom: 25, left: 25}
+
+const myDiv = d3.select("body")
+    .append("div")
+    .attr("id", "myTooltip")
+    .style("width", ttWidth + ttMargin.left + ttMargin.right + "px")
+    .style("height", ttHeight + ttMargin.top + ttMargin.bottom + "px");
+
+const ttSVG = myDiv.append("svg")
+      .attr("width", ttWidth + ttMargin.left + ttMargin.right)
+      .attr("height", ttHeight + ttMargin.top + ttMargin.bottom)
+    .append("g")
+      .attr("transform", `translate(${ttMargin.left}, ${ttMargin.top})`)
+
+const xScale = d3.scalePoint()
+    .range([0, ttWidth]);
+
+const yScale = d3.scaleLinear()
+   .range([ttHeight, 0]);
+
+const lineGenerator = d3.line()
+   .x(d => xScale(d.year))
+   .y(d => yScale(d.val));
+
+const ttLine = ttSVG.append("path")
+    .attr("class", "tooltip-line");
+
+
+// CHECKLIST FOR TOOLTIP
+// Axes 
+// Y axis -> Drought Index -> linearScale()
+// X Axis -> Years -> scalePoint()
+// lineGenerator = d3.line()
+// call it all on to the page 
+
 const colors = ['#c51b7d','#e9a3c9','#fde0ef','#f7f7f7','#e6f5d0','#a1d76a','#4d9221'];
 
 const colorScale = d3.scaleThreshold()
@@ -41,6 +95,19 @@ async function ready() {
 
   const data = await d3.csv("data/tidy-drought-data.csv");
   const topojsonData = await d3.json("data/GIS.OFFICIAL_CLIM_DIVISIONS.json");
+
+ const years = d3.set(data.map(d => +d.year)).values()
+    .sort(d3.ascending);
+
+  xScale.domain(years);
+  yScale.domain(d3.extent(data, d => +d.val)).nice();
+
+  ttSVG.append("g")
+    .call(d3.axisLeft(yScale))
+
+  ttSVG.append("g")
+    .attr("transform", `translate(0,${ttHeight})`)
+    .call(d3.axisBottom(xScale).tickValues([1895, 1920, 1955, 2013]))
 
   d3.select("#loading").remove()
 
@@ -59,8 +126,6 @@ async function ready() {
     .append("g")
       .attr("transform", `translate(${margin.left}, ${margin.top})`)
 
- const years = d3.set(data.map(d => +d.year)).values()
-    .sort(d3.ascending);
 
  const yearText = svg.append("text")
       .attr("y", 30)
@@ -73,12 +138,39 @@ async function ready() {
     dataLookup[d.id] = d.val
   })
 
-const divisions = svg.selectAll(".divisions")
+  const divisions = svg.selectAll(".divisions")
       .data(climateDivisions.features)
     .enter().append("path")
       .attr("class", "divisions")
       .attr("d", path)
       .style("fill", (d) => colorScale(dataLookup[d.properties.CLIMDIV]))
+      .on("mouseenter", function(d) {
+        d3.select(this).style("stroke-width", "4");
+
+        myDiv.transition()
+          .duration(100)
+          .style("opacity", 1)
+          .style("top", d3.event.pageY + "px")
+          .style("left", d3.event.pageX + "px")
+
+        ttLine
+          .datum(data.filter(e => e.id == d.properties.CLIMDIV))
+          .attr("d", lineGenerator);
+
+      })      
+      .on("mouseleave", function(d) {
+        d3.select(this).style("stroke-width", ".5");
+
+        myDiv.transition()
+          .duration(100)
+          .style("opacity", 0)
+
+        ttLine
+          .datum(data.filter(e => e.id == d.properties.CLIMDIV))
+          .attr("d", lineGenerator);
+
+      })
+
 
 let index = 0;
 let myTimer = d3.interval((elapsed) => {
@@ -143,3 +235,4 @@ let myTimer = d3.interval((elapsed) => {
 }
 
 </script>
+

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<style type="text/css">
+
+body {
+  font: 14px sans-serif;
+}
+
+</style> 
+
+<body>
+</body>
+
+<script>
+
+const margin = {top: 20, right: 20, bottom: 30, left: 100};
+const width = 500 - margin.left - margin.right,
+      height = 300 - margin.top - margin.bottom;
+
+ready();
+
+async function ready() {
+
+  const data = await d3.csv("UNdata_Export_20161019_010544114.csv");
+  const lookupData = await d3.csv("country-lookup.csv");
+
+};
+
+</script>

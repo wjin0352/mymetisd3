@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<style type="text/css">
+
+body {
+  font: 14px sans-serif;
+}
+
+.axis {
+  font: 12px sans-serif;
+}
+
+.x {
+  text-anchor: end;
+}
+
+.all {
+  stroke: #000;
+  stroke-width: .25;
+  fill-opacity: .75;
+  stroke-dasharray: 2,2;
+}
+
+.before {
+  stroke: #000;
+  stroke-width: .1;
+}
+
+</style> 
+
+<body>
+</body>
+
+<script>
+
+const margin = {top: 20, right: 20, bottom: 30, left: 100};
+const width = 500 - margin.left - margin.right,
+      height = 300 - margin.top - margin.bottom;
+
+const xScale = d3.scaleLinear()
+    .range([0,width])
+
+const yScale = d3.scaleLinear()
+    .range([height, 0]);
+
+const colorLookup = {Asia: "interpolateCool", Europe: "interpolateWarm", Africa: "interpolatePlasma", Oceania: "interpolateGnBu" , Americas: "interpolateViridis" }
+
+ready();
+
+async function ready() {
+
+  const data = await d3.csv("UNdata_Export_20161019_010544114.csv");
+  const lookupData = await d3.csv("country-lookup.csv");
+
+  const regionLookup = {};
+  lookupData.forEach(d => {
+    regionLookup[d.name] = d.region;
+  })
+
+  data.forEach(d => {
+    d["Value"] = +d["Value"];
+    d["Year(s)"] = +d["Year(s)"];
+    d["region"] = regionLookup[d['Country or Area']];
+  })
+
+  const filteredData = data
+      .filter(d => d["Variant"] == "Medium variant")
+      .filter(d => d["region"] != undefined)
+      .sort((a, b) => { return a["Year(s)"] - b["Year(s)"]})
+
+  const valueLookup = d3.nest()
+      .key(d => d["Year(s)"])
+      .key(d => d["Country or Area"])
+      .map(data);
+
+  const nestedData = d3.nest()
+      .key(d => d.region)
+      .entries(filteredData);
+
+  d3.select("body").selectAll("svg")
+      .data(nestedData)
+    .enter().append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`)
+      .each(function(thisSVG) {
+
+        const svg = d3.select(this);
+
+        svg.append("text")
+            .style("font", "18px sans-serif")
+            .attr("x", 5)
+            .text(d => d.key)
+
+        const countries = d3.set(thisSVG.values.map(d => d["Country or Area"])).values(),
+              years = d3.set(thisSVG.values.map(d => d["Year(s)"])).values();
+
+        const beforeData = []
+        const allData = []
+        years.forEach((year) => {
+          const eachYear = {}
+          countries.forEach((country) => {
+              eachYear["Year"] = year;
+              eachYear[country] = valueLookup["$" + year]["$" + country][0]["Value"]
+          })
+          if(+year < 2020) {
+            beforeData.push(eachYear)
+          } 
+            allData.push(eachYear);
+          
+        })
+
+        const stack = d3.stack()
+            .keys(countries)
+
+        const beforeSeries = stack(beforeData);
+        const allSeries = stack(allData);
+
+        xScale.domain(d3.extent(years));
+
+        const colorScale = d3.scaleSequential(d3[colorLookup[thisSVG.key]])
+            .domain([0, countries.length-1])
+
+        const allMaxValues = [];
+        allSeries.forEach(d => { 
+          d.forEach(e => {
+            allMaxValues.push(e[1])
+          })
+        })
+
+        maxValue = d3.max(allMaxValues)
+        yScale.domain([0, maxValue]).nice();
+
+        const area = d3.area()
+          .x(d => xScale(d.data["Year"]))
+          .y0(d => yScale(d[1]))
+          .y1(d => yScale(d[0]))
+
+        svg.selectAll(".all")
+          .data(allSeries)
+        .enter().append("path")
+          .attr("class", "all")
+          .style("fill", (d,i) => colorScale(i))
+          .attr("d", d => area(d))
+
+        svg.selectAll(".before")
+          .data(beforeSeries)
+        .enter().append("path")
+          .attr("class", "before")
+          .style("fill", (d,i) => colorScale(i))
+          .attr("d", d => area(d))
+
+        // x axis 
+        svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", `translate(0,${height})`)
+          .call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.format("")))
+
+        // y axis
+        svg.append("g")
+          .attr("class", "y axis")
+          .call(d3.axisLeft(yScale))
+      })
+
+};
+
+</script>

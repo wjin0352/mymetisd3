@@ -46,14 +46,12 @@ Download the data locally, start up a new index.html file and a local server. Yo
 Also,
 * Let's use d3.area() to convert our bar chart to an area chart
 * Labels or a legend?
-
-If there's time: [Beeswarms!](https://beta.observablehq.com/@mbostock/d3-beeswarm-iii)
-
+* What sort of interactivity would be good to add?
 
 
 ## Homework for Thursday
-* Bring questions, examples, anything you want to discuss one more time with the class!
-* I'd like each of you to share some work you've done. Have a link ready for Thursday!
+* Bring questions, examples, anything you want to discuss one more time with the class.
+* I'd like each of you to share some work you've done. Have a link ready for Thursday.
 
 
 

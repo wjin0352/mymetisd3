@@ -114,6 +114,15 @@ So today's the final class, but you should keep learning more D3. How!? You migh
     * Class-work, starter, and review 
   * Good Ways to Share your Work
       * Screenshots
+      * Videos
+      * Videos to gifs 
+        * [Imagemagik](https://www.imagemagick.org/script/index.php)
+              $ ffmpeg -i ~/videos/{YOUR FILE NAME}.mov -vf scale=400:-1 -r 5 ./stage/ffout%3d.png
+        * ``` $ convert -delay 8 -loop 0 ./stage/ffout*.png ../gifs/{YOUR GIF NAME}.gif
+          ```
+      * Storing Data
+        * Gists (smaller datasets)
+        * S3 Buckets (AWS)
       * Observable
       * Twitter
       * [Heroku](https://github.com/thisismetis/nyc17_dataviz7/tree/master/class13)

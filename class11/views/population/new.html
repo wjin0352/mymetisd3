@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<style type="text/css">
+
+body {
+  font: 14px sans-serif;
+}
+
+</style> 
+
+<body>
+</body>
+
+<script>
+ 
+
+ // Chart Checklist!
+
+ // Make SVG(s) DONE
+ // .. based on data! DONE
+ // each svg = region  DONE
+// for each SVG DONE
+
+// D3 Stack => Set the parameters (if we're changing defaults)
+//   * set the keys 
+//   * each country 
+//   * NEED TO make a stack for each SVG (area/region)
+
+// Make Axes 
+// * y axis => population  // linearScale?
+// * x axis => years // Ordinal Scale // TimeScale // LinearScale
+
+//  Color scales -> a different color scale for each region 
+// Text for each region 
+// Styling on the area 
+// Styling for projected values vs. actual values 
+// Maybe we want the same y scale for each region 
+// Dropdown for different projections?
+//
+// Filter the data for one variant (to start)
+//
+
+const margin = {top: 20, right: 20, bottom: 30, left: 100};
+const width = 500 - margin.left - margin.right,
+      height = 300 - margin.top - margin.bottom;
+
+const filteredVariant = "Medium variant";
+
+ready();
+
+async function ready() {
+
+  const data = await d3.csv("UNdata_Export_20161019_010544114.csv");
+  const lookupData = await d3.csv("country-lookup.csv");
+
+// console.log(data);
+ const myRegionLookup = {};
+ lookupData.forEach(d => {
+     myRegionLookup[d.name] = d.region;
+ })
+
+ data.forEach(d => {
+     d.region = myRegionLookup[d["Country or Area"]];
+     d.year = +d["Year(s)"];
+     d.value = +d["Value"];
+ })
+
+ const nestedData = d3.nest()
+         .key(d => d.region)
+         .entries(data.filter(d => d["Variant"] == filteredVariant))
+
+ const svg = d3.select("body").selectAll("svg")
+         .data(nestedData)
+     .enter().append("svg")
+         .style("border", "1px solid #000")
+         .attr("width", width + margin.left + margin.right)
+         .attr("height", height + margin.top + margin.bottom)
+     .append("g")
+         .attr("transform", `translate(${margin.left}, ${margin.top})`)
+         .each(function(thisSVG) {
+
+             const svg = d3.select(this);
+
+             svg.append("text")
+                 .text(thisSVG.key);
+
+             const countries = d3.set(thisSVG.values.map(d => d["Country or Area"] )).values()
+             const years = d3.set(thisSVG.values.map(d => d.year )).values()
+
+             const stack = d3.stack()
+                 .keys(countries)
+
+             const newDataStructure = [];
+             // Each ROW => Year
+             // * columns => key: value => Country Name: Population 
+             // {year: 1999, USA: 123123415, China: 1231453153253215, Congo: 2}
+             // Loop through FOR EACH YEAR
+             // then for each Country => push an object to new data structure
+             years.forEach(year => {
+                 const thisRecord = {}
+                 thisRecord["year"] = year
+                 countries.forEach(country => {
+                     thisRecord[country] =  thisSVG.values.filter(d => d.year == year & d["Country or Area"] == country)[0].value
+                 })
+                 newDataStructure.push(thisRecord)
+             })
+             console.log(thisSVG.values);
+             console.log(newDataStructure);
+
+             const series = stack(newDataStructure)
+
+
+         })
+
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>

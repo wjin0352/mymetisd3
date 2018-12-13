@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.links {
+  fill: none;
+  stroke: gray;
+}
+
+.nodes  {
+  fill: steelblue;
+  stroke: #000;
+}
+
+.texts {
+  fill: #fff;
+  font: 14px sans-serif;
+  text-anchor: middle;
+}
+
+</style>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://unpkg.com/d3-sankey@0"></script>
+
+<body>
+</body>
+
+<script>
+
+const margin = {top: 20, right: 20, bottom: 30, left: 50};
+const width = 800 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+const svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+const sankey = d3.sankey()
+      .nodeWidth(50)
+      .nodePadding(100)
+      .nodeAlign(d3.sankeyLeft)
+      .extent([[1, 1], [width - 1, height - 5]]);
+
+</script>

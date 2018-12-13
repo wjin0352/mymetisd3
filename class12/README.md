@@ -1,4 +1,4 @@
-# Class 11: Network Graphs
+# Class 12: Network Graphs & Sankey Diagrams
 
 ## Housekeeping
   * Show N' Tell! Let's see some of your work.
@@ -29,7 +29,6 @@ There are many different type of layouts for graphs. They type of graph is deter
  * [Arc](https://www.jasondavies.com/primos/)
  * [Hive](https://bost.ocks.org/mike/hive/)
  * [Tree](https://bl.ocks.org/mbostock/4339083)
- * [Lattice](https://bl.ocks.org/mbostock/1b64ec067fcfc51e7471d944f51f1611)
  * And yes! [Sankey Diagrams](https://beta.observablehq.com/@mbostock/d3-sankey-diagram)
 
 Note the way the data is structed in each example. All `graph = {nodes, links}`
@@ -79,7 +78,7 @@ link.value - the link’s numeric value
 
 So then for links, we're going to make something very similar to the force-directed graph, but we have to add a `value` field. This makes sense, as in a sankey diagram, the size of the rectangles and links are meaningful. Let's try to make this very simple sankey diagram. Let's talk about what the data will look like for it: 
 
-<img src="images/Screen Shot 2016-12-13 at 1.47.46 PM.png">
+<img src="images/Screen Shot 2018-12-13 at 1.47.46 PM.png">
 
 Similar checklist to force-directed
  1. Add you SVG
@@ -93,7 +92,7 @@ Similar checklist to force-directed
 
 Now that we have a simple example of a Sankey diagram done, let's try to up the complexity by creating one with the UN population data we worked with on Tuesday:
 
-<img src="images/Screen Shot 2016-12-13 at 2.22.14 PM.png">
+<img src="images/Screen Shot 2018-12-13 at 2.22.14 PM.png">
 
 The goal for this will be to figure out how we transform the data to get it in the right format. Let's talk about the data structure and see from our bag of tricks what we might want to use:
  * lookups functions?

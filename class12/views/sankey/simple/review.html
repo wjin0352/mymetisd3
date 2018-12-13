@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.links {
+  fill: none;
+  stroke: gray;
+}
+
+.nodes  {
+  fill: steelblue;
+  stroke: #000;
+}
+
+.texts {
+  fill: #fff;
+  font: 14px sans-serif;
+  text-anchor: middle;
+}
+
+</style>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://unpkg.com/d3-sankey@0"></script>
+
+<body>
+</body>
+
+<script>
+
+const margin = {top: 20, right: 20, bottom: 30, left: 50};
+const width = 800 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+const svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+const sankey = d3.sankey()
+      .nodeWidth(50)
+      .nodePadding(100)
+      .nodeAlign(d3.sankeyLeft)
+      .extent([[1, 1], [width - 1, height - 5]]);
+
+const graph =  {
+  nodes: d3.range(7).map(Object),
+  links: [
+    { source: 0, target: 2, value: 2},
+    { source: 1, target: 2, value: 1},
+    { source: 3, target: 2, value: 1},
+    { source: 2, target: 4, value: 2},
+    { source: 2, target: 5, value: 2},
+    { source: 5, target: 6, value: 2}
+  ]
+};
+
+console.log( sankey(graph));
+
+const link = svg.append("g")
+    .attr("class", "links")
+    .selectAll("line")
+    .data(graph.links)
+  .enter().append("path")
+    .attr("d", d3.sankeyLinkHorizontal())
+    .attr("stroke-width", d => Math.max(1, d.width));
+
+const node = svg.append("g")
+    .attr("class", "nodes")
+    .selectAll("rect")
+    .data(graph.nodes)
+  .enter().append("rect")
+    .attr("x", d => d.x0)
+    .attr("y", d => d.y0)
+    .attr("height", d => d.y1 - d.y0)
+    .attr("width", d => d.x1 - d.x0)
+
+const text = svg.append("g")
+    .attr("class", "texts")
+    .selectAll("text")
+    .data(graph.nodes)
+  .enter().append("text")
+    .attr("x", d => d.x0 + (d.x1 - d.x0)/2)
+    .attr("y", d => d.y0 + (d.y1 - d.y0)/2)
+    .attr("dy", 4)
+    .text(d => d.index )
+
+
+</script>

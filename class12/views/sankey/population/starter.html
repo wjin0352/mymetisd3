@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.links {
+  fill: none;
+  stroke-opacity: .5;
+}
+
+.nodes  {
+  fill: steelblue;
+  stroke: #000;
+}
+
+.texts {
+  fill: #fff;
+  font: 14px sans-serif;
+  text-anchor: middle;
+}
+
+</style>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://unpkg.com/d3-sankey@0"></script>
+
+<body>
+</body>
+
+<script>
+
+const margin = {top: 20, right: 20, bottom: 30, left: 50};
+const width = window.innerWidth * .9 - margin.left - margin.right,
+      height = 800 - margin.top - margin.bottom;
+
+const svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+const sankey = d3.sankey()
+      .nodeWidth(200)
+      .nodePadding(2)
+      .nodeAlign(d3.sankeyLeft)
+      .nodeId(d => d.id) // Note!
+      .extent([[1, 1], [width - 1, height - 5]]);
+
+const colorScale = d3.scaleOrdinal(d3.schemeDark2)
+
+ready();
+
+async function ready() {
+
+  const data = await d3.csv("UNdata_Export_20161019_010544114.csv");
+  const lookupData = await d3.csv("country-lookup.csv")
+  
+  const nodes = [];
+  const links = [];
+  const graph = {nodes, links}
+
+  sankey(graph);
+
+  // const link = svg.append("g")
+  //     .attr("class", "links")
+  //     .selectAll("line")
+  //     .data(graph.links)
+  //   .enter().append("path")
+  //     .attr("d", d3.sankeyLinkHorizontal())
+  //     .style("stroke-width", d => Math.max(1, d.width));
+
+  // const node = svg.append("g")
+  //     .attr("class", "nodes")
+  //     .selectAll("rect")
+  //     .data(graph.nodes)
+  //   .enter().append("rect")
+  //     .attr("x", d => d.x0)
+  //     .attr("y", d => d.y0)
+  //     .attr("height", d => d.y1 - d.y0)
+  //     .attr("width", d => d.x1 - d.x0);
+
+  // const text = svg.append("g")
+  //     .attr("class", "texts")
+  //     .selectAll("text")
+  //     .data(graph.nodes.filter(d => (d.y1 - d.y0) > 10))
+  //   .enter().append("text")
+  //     .attr("x", d => d.x0 + (d.x1 - d.x0)/2)
+  //     .attr("y", d => d.y0 + (d.y1 - d.y0)/2)
+  //     .attr("dy", 4);
+
+}
+
+</script>

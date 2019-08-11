@@ -96,6 +96,7 @@ async function ready() {
   const data = await d3.csv("data/tidy-drought-data.csv");
   const topojsonData = await d3.json("data/GIS.OFFICIAL_CLIM_DIVISIONS.json");
 
+
  const years = d3.set(data.map(d => +d.year)).values()
     .sort(d3.ascending);
 
@@ -113,7 +114,7 @@ async function ready() {
 
   const climateDivisions = topojson.feature(topojsonData, topojsonData.objects.GIS)
 
-  console.log(data, climateDivisions)
+  console.log('data' , data, 'climatedivisions ', climateDivisions)
 
   const path = d3.geoPath()
       .projection(d3.geoAlbersUsa()
@@ -133,8 +134,9 @@ async function ready() {
       .text(years[0]);
 
   const dataLookup = {};
-  data.filter(d => d.year == years[0])
+  data.filter(d =>  d.year == years[0])
   .forEach(d => {
+    console.log('d id ', d.year, years[0], 'd.val', d.val)
     dataLookup[d.id] = d.val
   })
 
@@ -191,9 +193,9 @@ let myTimer = d3.interval((elapsed) => {
   if((years.length - 1) == index) {
     myTimer.stop();
   }
-  if(myRandoVariabile) {
-    index += 1;
-  }
+  // if(myRandoVariabile) {
+  //   index += 1;
+  // }
 }, 500)
 
   
@@ -236,15 +238,3 @@ let myTimer = d3.interval((elapsed) => {
 }
 
 </script>
-
-<<<<<<< HEAD
-=======
-
-
-
-
-
-
-
-
->>>>>>> 933aa9378229b20fcedba52ca26c6f2d94d866d7

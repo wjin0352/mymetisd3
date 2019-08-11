@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <style>
+    path {
+      stroke-width: 2px;
+      stroke: #fff;
+    }
+
+    text {
+      font: 20px Helvetica, Arial, sans-serif;
+      fill: #999;
+      font-weight: 500;
+    }
+
+    g text {
+      text-anchor: middle;
+      font-size: 10px;
+      fill: #444;
+    }
+
+    .HI, .MI, .NE, .ME {
+      stroke: none;
+    }
+
+  </style>
+</head>
+<body>
+<svg width="960" height="500" xmlns="http://www.w3.org/2000/svg">
+  <text x="120" y="500" dy="-0.5em"></text>
+</svg>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.3/d3.min.js"></script>
+<script src="polybool.min.js"></script>
+<script src="polylabel.min.js"></script>
+<script>
+  (function() {
+
+  var colors = ["#69f0ae", "#ffe082", "#80deea", "#ffab91", "#ce93d8"];
+
+  d3.queue()
+    .defer(getSVG, "fte.svg")
+    .defer(getSVG, "wp.svg")
+    .defer(getSVG, "kos.svg")
+    .defer(getSVG, "npr.svg")
+    .defer(getSVG, "wsj.svg")
+    .awaitAll(function(err, cartograms){
+
+      if (err) throw err;
+
+      var combined = cartograms.reduce(function(byState, cartogram){
+
+        cartogram.selectAll("path").each(function(){
+
+          var path = d3.select(this),
+              state = path.attr("id"),
+              shape = parsePath(path.attr("d"));
+
+          if (!byState[state]) byState[state] = [];
+          byState[state].push(shape);
+
+        });
+
+        return byState;
+
+      }, {});
+
+      var shapeSets = d3.entries(combined).map(function(entry, i){
+        return {
+          state: entry.key,
+          centers: getCenters(entry.key, entry.value),
+          shapes: getTweenablePairs(entry.value),
+          index: 0
+        };
+      });
+
+      shapeSets[0].site = d3.select("text").datum(cartograms.map(function(cartogram){
+        return cartogram.select("text").text();
+      })).text(function(d){
+        return d[0];
+      });
+
+      var states = d3.select("svg").selectAll("g")
+        .data(shapeSets)
+        .enter()
+        .append("g");
+
+      states.each(function(d){
+
+        var state = d3.select(this);
+
+        d.path = state.append("path")
+          .attr("class", d.state);
+
+        d.label = state.append("text")
+          .attr("dy", "0.25em")
+          .text(d.state)
+          .attr("x", d.centers[0][0])
+          .attr("y", d.centers[0][1]);
+
+        morph(state, d);
+
+      });
+
+    });
+
+  function morph(state, d) {
+
+    var fr = d.index % d.shapes.length,
+        to = ++d.index % d.shapes.length;
+
+    d.path.attr("d", join(d.shapes[fr][0]))
+      .attr("fill", colors[fr]);
+
+    var t = d3.transition()
+      .delay(800)
+      .duration(2000);
+
+    d.path.transition(t)
+      .attr("d", join(d.shapes[fr][1]))
+      .attr("fill", colors[to])
+      .on("end", function(){
+        morph(state, d);
+      });
+
+    d.label.transition(t)
+      .attr("x", d.centers[to][0])
+      .attr("y", d.centers[to][1]);
+
+    if (d.site) {
+      updateSite(d.site, to);
+    }
+
+  }
+
+  function getTweenablePairs(shapes) {
+
+    return shapes.map(function(shape, i){
+      return matchShapes(shape, shapes[i + 1] || shapes[0]);
+    });
+
+  }
+
+  function matchShapes(a, b) {
+
+    a = a.slice(0);
+    b = b.slice(0);
+
+    if (b.length > 1) {
+      a = subdivide(a[0], b);
+    } else if (a.length > 1) {
+      b = subdivide(b[0], a);
+    }
+
+    var aligned = a.map(function(ring, i){
+      return matchRings(ring, b[i]);
+    });
+
+    return [
+      aligned.map(function(d){ return d[0]; }),
+      aligned.map(function(d){ return d[1]; })
+    ];
+
+  }
+
+  function matchRings(a, b) {
+
+    a = a.slice(0);
+    b = b.slice(0);
+
+    if (a.length < b.length) {
+      addPoints(a, b.length - a.length);
+    } else if (b.length < a.length) {
+      addPoints(b, a.length - b.length);
+    }
+
+    a = wind(a, b);
+
+    return [a, b];
+  }
+
+  function subdivide(ring, vs) {
+
+    var bounds = getBounds(ring),
+        areas = vs.map(unsignedArea),
+        totalArea = d3.sum(areas),
+        before = 0;
+
+    for (var i = 1; i < ring.length; i++) {
+      if (ring[i][0] === ring[0][0] && ring[i][1] === ring[0][1]) {
+        return [ring.slice(0, i), ring.slice(i)];
+      }
+    }
+
+    return areas.map(function(area) {
+
+      var intersection = PolyBool.intersect(
+        { regions: [ ring ], inverted: false },
+        { regions: [ clipRect(bounds, before, area / totalArea) ], inverted: false }
+      );
+
+      intersection.regions.sort(function(a,b){
+        return unsignedArea(b) - unsignedArea(a);
+      });
+
+      if (d3.polygonArea(intersection.regions[0]) > 0) {
+        intersection.regions[0].reverse();
+      }
+
+      before += area / totalArea;
+
+      return intersection.regions[0];
+
+    }).sort(function(a, b){
+      return d3.polygonCentroid(a)[0] - d3.polygonCentroid(b)[0];
+    });
+
+  }
+
+  function addPoints(ring, numPoints) {
+
+    var desiredLength = ring.length + numPoints,
+        step = d3.polygonLength(ring) / numPoints;
+
+    var i = 0,
+        cursor = 0,
+        insertAt = step / 2;
+
+    do {
+
+      var a = ring[i],
+          b = ring[(i + 1) % ring.length];
+
+      var segment = distanceBetween(a, b);
+
+      if (insertAt <= cursor + segment) {
+        ring.splice(i + 1, 0, pointBetween(a, b, (insertAt - cursor) / segment));
+        insertAt += step;
+        continue;
+      }
+
+      cursor += segment;
+      i++;
+
+    } while (ring.length < desiredLength);
+
+  }
+
+  function wind(ring, vs) {
+
+    var len = ring.length,
+        min = Infinity,
+        bestOffset,
+        sum;
+
+    for (var offset = 0, len = ring.length; offset < len; offset++) {
+
+      var sum = d3.sum(vs.map(function(p, i){
+        var distance = distanceBetween(ring[(offset + i) % len], p);
+        return distance * distance;
+      }));
+
+      if (sum < min) {
+        min = sum;
+        bestOffset = offset;
+      }
+
+    }
+
+    return ring.slice(bestOffset).concat(ring.slice(0, bestOffset));
+
+  }
+
+  function clipRect(bounds, start, pct) {
+
+    var x0 = bounds.x0 + bounds.dx * start,
+        x1 = x0 + bounds.dx * pct;
+
+    return [
+      [x0, bounds.y0],
+      [x0, bounds.y1],
+      [x1, bounds.y1],
+      [x1, bounds.y0]
+    ];
+
+  }
+
+  function getBounds(ring) {
+    var x0 = y0 = Infinity,
+        x1 = y1 = -Infinity;
+
+    ring.forEach(function(p){
+      if (p[0] < x0) x0 = p[0];
+      if (p[0] > x1) x1 = p[0];
+      if (p[1] < y0) y0 = p[1];
+      if (p[1] > y1) y1 = p[1];
+    });
+
+    return {
+      x0: x0,
+      x1: x1,
+      y0: y0,
+      y1: y1,
+      dx: x1 - x0,
+      dy: y1 - y0
+    };
+
+  }
+
+  function getCenters(state, shapes) {
+    return shapes.map(function(shape){
+
+      var flattened;
+
+      if (shape.length > 1 || (state === "AK" || state === "HI")) {
+        flattened = shape.reduce(function(prev, ring){
+          return prev.concat(ring);
+        }, []);
+        return polylabel([d3.polygonHull(flattened)]);
+      }
+
+      return polylabel(shape);
+    });
+  }
+
+  function parsePath(str) {
+
+    var polys = str.replace(/^M|Z$/g,"").split("ZM").map(function(poly){
+      return poly.split("L").map(function(pair){
+        return pair.split(",").map(function(point){
+          return +point;
+        });
+      });
+    })
+
+    return polys;
+
+  }
+
+  function pointBetween(a, b, pct) {
+    return [
+      a[0] + (b[0] - a[0]) * pct,
+      a[1] + (b[1] - a[1]) * pct
+    ];
+  }
+
+  function distanceBetween(a, b) {
+    return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2));
+  }
+
+  function unsignedArea(d) {
+    return Math.abs(d3.polygonArea(d));
+  }
+
+  function join(rings) {
+    return rings.map(function(ring){
+      return "M" + ring.join("L") + "Z";
+    }).join("");
+  }
+
+  function updateSite(site, index) {
+    site.transition()
+      .duration(1800)
+      .on("end", function(){
+        site.text(function(d){
+          return d[index];
+        });
+      });
+  }
+
+  function getSVG(url, cb) {
+    d3.xml(url)
+      .mimeType("image/svg+xml")
+      .get(function(err, xml) {
+        cb(err, d3.select(xml.documentElement));
+      });
+  }
+  })()
+</script>

@@ -7,6 +7,10 @@
     font-family: arial, sans;
     font-size: 14px;
   }
+  .divisions {
+    stroke: #000;
+    stroke-width: .5;
+  }
 
 </style>
 
@@ -24,24 +28,60 @@ const margin = {top: 5, right: 5, bottom: 5, left: 5};
 const width = 900 - margin.left - margin.right,
       height = 500 - margin.top - margin.bottom;
 
-const colors = ['#c51b7d','#e9a3c9','#fde0ef','#f7f7f7','#e6f5d0','#a1d76a','#4d9221'];
+const colors = ['steelblue','#e9a3c9','#fde0ef','#f7f7f7','#e6f5d0','#a1d76a','#4d9221'];
 
-const threshold = d3.scaleThreshold()
-        .domain([-4, -3, -2, 2, 3, 4])
-        .range(colors);
+const lineGenerator = d3.line()
+  .x([d => xScale(d.year)])
+  .y([d => yScale(d.val)]);
 
-ready();
+const colorScale = d3.scaleThreshold()
+  .domain([-4, -3, -2, 2, 3, 4])
+  .range(colors);
+
+  ready();
 
 async function ready() {
-
-  const data = await d3.csv("data/tidy-drought-data.csv");
-  const topojsonData = await d3.json("data/GIS.OFFICIAL_CLIM_DIVISIONS.json");
-
-  d3.select("#loading").text("It's not loading!")
-
+  // https://www.d3indepth.com/geographic/
+  const data = await d3.csv('data/tidy-drought-data.csv');
+  const topojsonData = await d3.json('data/GIS.OFFICIAL_CLIM_DIVISIONS.json');
+  // console.log('topojson ', topojson, 'topojson.feature ', topojson.feature)
   const climateDivisions = topojson.feature(topojsonData, topojsonData.objects.GIS)
 
+  const years = d3.set(data.map(d => +d.year)).values()
+    .sort(d3.ascending);
 
+  const dataLookup = {};
+  data.filter(d => d.year == years[0])
+    .forEach(d => {
+      console.log('d id ', d.year, years[0], 'd.val', d.val)
+      dataLookup[d.id] = d.val
+    })
+
+  console.log('climateDivisions ', climateDivisions)
+  const path = d3.geoPath()
+    .projection(d3.geoAlbersUsa()
+      .fitSize([width, height], climateDivisions)
+    )
+
+  const svg = d3.select('#chart-container')
+    .append('svg')
+      .attr('width', width + margin.left + margin.right)
+      .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+      .attr("transform", `translate(${margin.left}, ${margin.top})`)
+
+
+
+  const divisions = svg.selectAll('.divisions')
+      .data(climateDivisions.features)
+    .enter().append('path')
+      .attr('class', 'divisions')
+      .attr('d', path)
+      // .style('fill', (d) => colorScale(dataLookup[d.properties.CLIMDIV]))
+      .attr('fill', (d,i) => {
+        console.log(d, i)
+        return colorScale(dataLookup[d.properties.CLIMDIV]);
+      })
 }
 
 </script>

@@ -41,8 +41,9 @@ var svg = d3.select("body").append("svg")
 d3.tsv("barley.tsv").then(ready)
 
   function ready(data) {
-
+    
   var sampleData = data.filter(function(d) { return d.site == 'University Farm'; })
+  console.log('data ', data, 'sampledata ', sampleData)
 
   xScale.domain(d3.set(sampleData.map(function(d) { return d.variety; })).values());
   yScale.domain(d3.extent(sampleData, function(d) { return d.yield }));

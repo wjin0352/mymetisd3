@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+
+<script src="https://d3js.org/d3.v5.min.js"></script>
+
+<style type="text/css">
+
+svg {
+    border: 1px solid #000;
+}
+</style>
+
+<body>
+</body>
+
+<script>
+  
+  const width = 500,
+        height = 300,
+        margin = {top: 30, bottom: 30, left: 30, right: 60};
+
+
+  function randomLetters() {
+  return d3.shuffle("abcdefghijklmnopqrstuvwxyz".split(""))
+    .slice(0, Math.floor(6 + Math.random() * 20))
+    .sort();
+  }
+
+
+function drawChart(siteName, data) {
+
+  const svg = d3.select("body").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+  var x = 0;
+  while(x < 20) {
+    console.log('tick ')
+    svg.selectAll('text')
+    .data(randomLetters())
+    .join(
+      enter => enter.append('text')
+          .attr('fill', 'green')
+          .text(d => d),
+      update => update
+          .attr('fill', 'red')
+    )
+      .attr('x' , (d,i) => { return i * 16 })
+    // await Promises.tick(2500)
+    x++;
+  }
+ 
+
+  // const svg = d3.create("svg")
+  //     .attr("width", width)
+  //     .attr("height", 33)
+  //     .attr("viewBox", `0 -20 ${width} 33`);
+
+  // var x = 0;
+  // while(x < 20) {
+  //   svg.selectAll("text")
+  //     .data(randomLetters(), d => d)
+  //     .join(
+  //       enter => enter.append("text")
+  //           .attr("fill", "green")
+  //           .text(d => d),
+  //       update => update
+  //           .attr("fill", "gray")
+  //     )
+  //       .attr("x", (d, i) => i * 16);
+
+  //   // await Promises.tick(2500);
+  //   x++;
+  // }
+
+}
+
+drawChart() 
+// setTimeout( function() { drawChart(), 1000 })
+
+</script>
+
+
+
